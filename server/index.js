@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 });
 
 // Pastikan folder uploads ada
-const uploadDir = path.join(__dirname, 'public/uploads');
+const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp' : path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -835,7 +835,7 @@ app.get('*', (req, res) => {
   });
 });
 
-const serverless = require('serverless-http'); module.exports.handler = serverless(app); app.listen(PORT, () => {
+module.exports = app; app.listen(PORT, () => {
   console.log(`===============================================`);
   console.log(`🚀 Server Portal PakBani aktif di http://localhost:${PORT}`);
   console.log(`===============================================`);
