@@ -2,7 +2,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
-import BottomNav from './components/BottomNav';
+
 import Dashboard from './pages/Dashboard';
 import MateriPage from './pages/MateriPage';
 import JadwalPage from './pages/JadwalPage';
@@ -67,7 +67,7 @@ function MainContent() {
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <BottomNav />
+      
 
       {/* Floating Toast Notification */}
       {toast && (
