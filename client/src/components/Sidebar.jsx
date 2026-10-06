@@ -4,7 +4,7 @@ import { LayoutDashboard, BookOpen, Calendar, UserCheck, Award, FileSpreadsheet,
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {
-  const { activeTab, setActiveTab, activeRole, activeKelas } = useApp();
+  const { activeTab, setActiveTab, activeRole, activeKelas, isMobileMenuOpen, setIsMobileMenuOpen } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Beranda', desc: 'Ringkasan & KBM', icon: LayoutDashboard },
@@ -37,7 +37,7 @@ export default function Sidebar() {
               key={item.id}
               onClick={() => {
                 sounds.playClick();
-                setActiveTab(item.id);
+                setActiveTab(item.id); setIsMobileMenuOpen(false);
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                 isActive

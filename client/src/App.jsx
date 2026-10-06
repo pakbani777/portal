@@ -14,7 +14,7 @@ import LoginPage from './pages/LoginPage';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 function MainContent() {
-  const { activeTab, toast, isAuthenticated } = useApp();
+  const { activeTab, toast, isAuthenticated, isMobileMenuOpen, setIsMobileMenuOpen } = useApp();
 
   if (!isAuthenticated) {
     return <LoginPage />;
