@@ -33,7 +33,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo & Judul: Portal PakBani */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3"><button className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>{isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-800 via-blue-700 to-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-800/20">
               <BookOpen className="w-5 h-5 text-amber-300" />
             </div>
