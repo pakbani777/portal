@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
+  name     String
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  category    String
+  institution String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Teacher {
+  id          String   @id @default(cuid())
+  name        String
+  role        String
+  institution String
+  createdAt   DateTime @default(now())
+  imageUrl    String?
+}
+
+model Registration {
+  id          String   @id @default(cuid())
+  institution String
+  fullName    String
+  gender      String
+  birthPlace  String
+  birthDate   DateTime
+  address     String
+  whatsapp    String
+  program     String?
+  nisn        String?
+  prevSchool  String?
+  parentName  String?
+  parentJob   String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  group     String
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  parentName  String
+  studentName String
+  institution String
+  content     String
+  rating      Int      @default(5)
+  createdAt   DateTime @default(now())
+}

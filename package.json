@@ -1,0 +1,23 @@
+{
+  "name": "portal-pai-smp",
+  "version": "1.0.0",
+  "description": "Portal Web Pembelajaran Terpadu Pendidikan Agama Islam (PAI) Kelas 7, 8, 9",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev:server": "node server/index.js",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "node -e \"const { spawn } = require('child_process'); const s = spawn('node', ['server/index.js'], { stdio: 'inherit', shell: true }); const c = spawn('npm', ['run', 'dev', '--prefix', 'client'], { stdio: 'inherit', shell: true }); process.on('SIGINT', () => { s.kill(); c.kill(); process.exit(); });\"",
+    "build:client": "npm run build --prefix client",
+    "start": "node server/index.js"
+  },
+  "keywords": [
+    "pai",
+    "islamic-education",
+    "cbt",
+    "quiz",
+    "attendance",
+    "smp"
+  ],
+  "author": "Antigravity",
+  "license": "ISC"
+}
