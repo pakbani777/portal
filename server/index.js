@@ -824,9 +824,7 @@ app.get('/api/pengumuman', async (req, res) => {
 // Serving static frontend jika dist tersedia
 const distPath = path.join(__dirname, '../client/dist');
 app.use(express.static(distPath));
-app.all('/(.*)', (req, res) => {
-  if (req.url.startsWith('/api')) {
-    return res.status(404).json({ success: false, message: 'Endpoint API tidak ditemukan' });
+
   }
   res.sendFile(path.join(distPath, 'index.html'), (err) => {
     if (err) {
