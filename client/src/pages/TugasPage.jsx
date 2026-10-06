@@ -86,7 +86,7 @@ export default function TugasPage() {
                   Kelas {tugas.kelas}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] text-slate-500 font-semibold">
-                  <Clock className="w-3 h-3" /> {new Date(tugas.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <Clock className="w-3 h-3" /> {tugas.deadline ? new Date(tugas.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                 </span>
               </div>
               <h3 className="text-base font-bold text-slate-900 mb-2 leading-snug">{tugas.judul}</h3>
