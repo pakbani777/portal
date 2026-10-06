@@ -127,3 +127,20 @@ export async function fetchPengumuman() {
   const res = await fetch(`${BASE_URL}/pengumuman`);
   return res.json();
 }
+export const createPengumuman = async (data) => {
+  const res = await fetch(`${API_BASE_URL}/api/pengumuman`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
+
+export const createUser = async (data) => {
+  const res = await fetch(`${API_BASE_URL}/api/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};

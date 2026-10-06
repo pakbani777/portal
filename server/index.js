@@ -810,6 +810,18 @@ app.get('/api/nilai', async (req, res) => {
 
 // ==========================================
 // 10. PENGUMUMAN
+app.post('/api/pengumuman', async (req, res) => {
+  try {
+    const { judul, isi, tipe } = req.body;
+    const { data: inserted, error } = await supabase.from('pengumuman').insert([{
+      judul, isi, tipe: tipe || 'info', tanggal: new Date().toISOString()
+    }]).select();
+    if (error) throw error;
+    res.json({ success: true, data: inserted[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 // ==========================================
 app.get('/api/pengumuman', async (req, res) => {
   try {

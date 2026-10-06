@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai, createMateri } from '../services/api';
+import { fetchNilai, createMateri, createPengumuman } from '../services/api';
 import { Settings, PlusCircle, Download, Send, ShieldCheck } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
@@ -110,6 +110,27 @@ export default function GuruAdminPage() {
 
   const [activeAdminTab, setActiveAdminTab] = useState('materi_nilai');
 
+  const [formPengumuman, setFormPengumuman] = useState({ judul: '', isi: '', tipe: 'info' });
+  const [submittingPengumuman, setSubmittingPengumuman] = useState(false);
+  const handlePengumumanSubmit = async (e) => {
+    e.preventDefault();
+    if (!formPengumuman.judul || !formPengumuman.isi) return showToast('Judul dan Isi harus diisi');
+    setSubmittingPengumuman(true);
+    try {
+      const res = await createPengumuman(formPengumuman);
+      if (res.success) {
+        showToast('Pengumuman berhasil diterbitkan!');
+        setFormPengumuman({ judul: '', isi: '', tipe: 'info' });
+      } else {
+        showToast(res.message);
+      }
+    } catch (e) {
+      showToast('Gagal menerbitkan pengumuman');
+    }
+    setSubmittingPengumuman(false);
+  };
+
+
   return (
     <div className="space-y-6 pb-24 md:pb-8">
       
@@ -150,7 +171,7 @@ export default function GuruAdminPage() {
         </div>
       </div>
 
-      {activeAdminTab === 'materi_nilai' ? (
+      {activeAdminTab === 'materi_nilai' && (
       <div className="space-y-4">
         {/* Filter Kelas */}
         <div className="flex items-center justify-end">
@@ -231,6 +252,7 @@ export default function GuruAdminPage() {
                   <option value="Al-Qur'an & Hadis">Al-Qur'an & Hadis</option>
                   <option value="Akidah">Akidah</option>
                   <option value="Akhlak">Akhlak</option>
+                  <option value="Pendidikan Agama Kristen (PAK)">Pendidikan Agama Kristen (PAK)</option>
                   <option value="Fiqih Ibadah">Fiqih Ibadah</option>
                   <option value="Sejarah Kebudayaan Islam">Sejarah Kebudayaan Islam</option>
                 </select>
@@ -405,10 +427,10 @@ export default function GuruAdminPage() {
 
       </div>
       </div>
-      ) : (
-        <UserManagement />
       )}
-
+      {activeAdminTab === 'users' && <UserManagement />}
     </div>
   );
 }
+
+
