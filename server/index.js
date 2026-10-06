@@ -834,9 +834,9 @@ app.get('*', (req, res) => {
     }
   });
 });
-
-module.exports = app; app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`🚀 Server Portal PakBani aktif di http://localhost:${PORT}`);
-  console.log(`===============================================`);
-});
+module.exports = app;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log('Server aktif');
+  });
+}
