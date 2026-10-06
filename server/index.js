@@ -194,6 +194,45 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.post('/api/users/bulk', async (req, res) => {
+  try {
+    const { kelas, defaultPassword, users: newUsers } = req.body;
+    if (!newUsers || !Array.isArray(newUsers) || newUsers.length === 0) {
+      return res.status(400).json({ success: false, message: 'Daftar pengguna kosong' });
+    }
+
+    // 1. Prepare data for 'users' table
+    const usersData = newUsers.map(u => ({
+      username: (u.nisn || u.nama.replace(/\s+/g, '').toLowerCase()).substring(0, 50),
+      password: defaultPassword || 'siswa123',
+      role: 'siswa',
+      nama: u.nama,
+      nisn_nip: u.nisn || '',
+      kelas: kelas
+    }));
+
+    // 2. Prepare data for 'siswa' table
+    const siswaData = newUsers.map(u => ({
+      nisn: u.nisn || '',
+      nama: u.nama,
+      kelas: kelas,
+      gender: 'L'
+    }));
+
+    // Insert to users table
+    const { error: userErr } = await supabase.from('users').insert(usersData);
+    if (userErr) throw userErr;
+
+    // Insert to siswa table
+    const { error: siswaErr } = await supabase.from('siswa').insert(siswaData);
+    if (siswaErr) throw siswaErr;
+
+    res.json({ success: true, message: Berhasil menginput \ siswa kelas \ });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.post('/api/users', async (req, res) => {
   try {
     const { username, password, role, nama, nisn_nip, kelas, gender } = req.body;
@@ -841,3 +880,4 @@ if (process.env.NODE_ENV !== 'production') {
     console.log('Server aktif');
   });
 }
+
