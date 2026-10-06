@@ -1,7 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const db = require('./db');
+const { createClient } = require('@supabase/supabase-js');
+const multer = require('multer');
+const fs = require('fs');
+
+const supabaseUrl = 'https://bodfmgacldijewceqymz.supabase.co';
+const supabaseKey = 'sb_publishable_Iz9gGDjlhnGZeKS9DUVuQQ_7Dg6Q0lK';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -14,9 +20,6 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
-
-const multer = require('multer');
-const fs = require('fs');
 
 // Pastikan folder uploads ada
 const uploadDir = path.join(__dirname, 'public/uploads');
@@ -42,7 +45,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 // ==========================================
 // 1. AUTENTIKASI LOGIN (GURU & SISWA)
 // ==========================================
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password, role } = req.body;
 
@@ -54,15 +57,24 @@ app.post('/api/auth/login', (req, res) => {
     const cleanPass = password.trim();
 
     // Cek di database users
-    let user = db.prepare(`
-      SELECT * FROM users 
-      WHERE (LOWER(username) = ? OR nisn_nip = ?) 
-      AND password = ?
-    `).get(cleanUser, username.trim(), cleanPass);
+    let { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .or(`username.ilike.${cleanUser},nisn_nip.eq.${username.trim()}`)
+      .eq('password', cleanPass)
+      .limit(1);
+
+    let user = users && users.length > 0 ? users[0] : null;
 
     // Fallback autentikasi jika user login dengan NISN dari tabel siswa
     if (!user) {
-      const siswa = db.prepare('SELECT * FROM siswa WHERE nisn = ? OR LOWER(nama) LIKE ?').get(username.trim(), `%${cleanUser}%`);
+      const { data: siswas } = await supabase
+        .from('siswa')
+        .select('*')
+        .or(`nisn.eq.${username.trim()},nama.ilike.%${cleanUser}%`)
+        .limit(1);
+        
+      const siswa = siswas && siswas.length > 0 ? siswas[0] : null;
       if (siswa && cleanPass === 'siswa123') {
         user = {
           id: siswa.id,
@@ -115,33 +127,50 @@ app.post('/api/auth/login', (req, res) => {
 // ==========================================
 // 1B. PROFIL & UPLOAD FOTO
 // ==========================================
-app.post('/api/users/profile', upload.single('foto'), (req, res) => {
+app.post('/api/users/profile', upload.single('foto'), async (req, res) => {
   try {
     const { id, nama, username, password } = req.body;
     if (!id || !nama || !username) {
       return res.status(400).json({ success: false, message: 'ID, Nama, dan Username wajib diisi' });
     }
 
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    const { data: users, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .limit(1);
+
+    if (fetchError) throw fetchError;
+    const user = users && users.length > 0 ? users[0] : null;
+    
     if (!user) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
 
     let foto_profil = user.foto_profil;
     if (req.file) {
-      // Return absolute URL relative to host, e.g. /public/uploads/...
       foto_profil = `/public/uploads/${req.file.filename}`;
     }
 
+    let updateData = { nama, username, foto_profil };
     if (password && password.trim() !== '') {
-      db.prepare('UPDATE users SET nama = ?, username = ?, password = ?, foto_profil = ? WHERE id = ?')
-        .run(nama, username, password.trim(), foto_profil, id);
-    } else {
-      db.prepare('UPDATE users SET nama = ?, username = ?, foto_profil = ? WHERE id = ?')
-        .run(nama, username, foto_profil, id);
+      updateData.password = password.trim();
     }
-    
-    const updatedUser = db.prepare('SELECT id, username, role, nama, nisn_nip, kelas, foto_profil FROM users WHERE id = ?').get(id);
 
-    res.json({ success: true, message: 'Profil berhasil diperbarui', data: updatedUser });
+    const { error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', id);
+
+    if (updateError) throw updateError;
+    
+    const { data: updatedUsers, error: fetchUpdatedError } = await supabase
+      .from('users')
+      .select('id, username, role, nama, nisn_nip, kelas, foto_profil')
+      .eq('id', id)
+      .limit(1);
+
+    if (fetchUpdatedError) throw fetchUpdatedError;
+
+    res.json({ success: true, message: 'Profil berhasil diperbarui', data: updatedUsers[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -150,49 +179,69 @@ app.post('/api/users/profile', upload.single('foto'), (req, res) => {
 // ==========================================
 // 1C. MANAJEMEN PENGGUNA (Oleh Admin/Guru)
 // ==========================================
-app.get('/api/users', (req, res) => {
+app.get('/api/users', async (req, res) => {
   try {
-    const items = db.prepare('SELECT id, username, role, nama, nisn_nip, kelas, foto_profil FROM users ORDER BY role ASC, nama ASC').all();
+    const { data: items, error } = await supabase
+      .from('users')
+      .select('id, username, role, nama, nisn_nip, kelas, foto_profil')
+      .order('role', { ascending: true })
+      .order('nama', { ascending: true });
+      
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-app.post('/api/users', (req, res) => {
+app.post('/api/users', async (req, res) => {
   try {
     const { username, password, role, nama, nisn_nip, kelas, gender } = req.body;
     if (!username || !password || !nama || !role) {
       return res.status(400).json({ success: false, message: 'Username, Password, Nama, dan Role wajib diisi' });
     }
 
-    // Check existing username
-    const exist = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
-    if (exist) {
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .limit(1);
+      
+    if (existingUser && existingUser.length > 0) {
       return res.status(400).json({ success: false, message: 'Username sudah digunakan' });
     }
 
-    const insertUser = db.prepare(`
-      INSERT INTO users (username, password, role, nama, nisn_nip, kelas)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    
-    // Gunakan transaction untuk memastikan integritas (opsional, tapi disarankan)
-    const transaction = db.transaction(() => {
-      insertUser.run(username, password, role, nama, nisn_nip || '', kelas || '');
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert([{
+        username,
+        password,
+        role,
+        nama,
+        nisn_nip: nisn_nip || '',
+        kelas: kelas || ''
+      }]);
       
-      // Jika role adalah siswa, tambahkan juga ke tabel siswa agar masuk ke daftar absensi/nilai resmi
-      if (role === 'siswa' && nisn_nip && kelas) {
-        // Cek dulu apakah NISN sudah ada di tabel siswa
-        const existSiswa = db.prepare('SELECT id FROM siswa WHERE nisn = ?').get(nisn_nip);
-        if (!existSiswa) {
-          db.prepare('INSERT INTO siswa (nisn, nama, kelas, gender) VALUES (?, ?, ?, ?)')
-            .run(nisn_nip, nama, kelas, gender || 'L');
-        }
+    if (insertError) throw insertError;
+
+    if (role === 'siswa' && nisn_nip && kelas) {
+      const { data: existSiswa } = await supabase
+        .from('siswa')
+        .select('id')
+        .eq('nisn', nisn_nip)
+        .limit(1);
+        
+      if (!existSiswa || existSiswa.length === 0) {
+        await supabase
+          .from('siswa')
+          .insert([{
+            nisn: nisn_nip,
+            nama,
+            kelas,
+            gender: gender || 'L'
+          }]);
       }
-    });
-    
-    transaction();
+    }
 
     res.json({ success: true, message: 'Pengguna baru berhasil ditambahkan' });
   } catch (error) {
@@ -200,7 +249,7 @@ app.post('/api/users', (req, res) => {
   }
 });
 
-app.put('/api/users/:id/password', (req, res) => {
+app.put('/api/users/:id/password', async (req, res) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -209,10 +258,14 @@ app.put('/api/users/:id/password', (req, res) => {
       return res.status(400).json({ success: false, message: 'Password baru tidak boleh kosong' });
     }
 
-    const update = db.prepare('UPDATE users SET password = ? WHERE id = ?');
-    const result = update.run(password, id);
+    const { data, error } = await supabase
+      .from('users')
+      .update({ password })
+      .eq('id', id)
+      .select();
 
-    if (result.changes === 0) {
+    if (error) throw error;
+    if (!data || data.length === 0) {
       return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
     }
 
@@ -225,17 +278,18 @@ app.put('/api/users/:id/password', (req, res) => {
 // ==========================================
 // 2. DAFTAR SISWA RESMI
 // ==========================================
-app.get('/api/siswa', (req, res) => {
+app.get('/api/siswa', async (req, res) => {
   try {
     const { kelas } = req.query;
-    let query = 'SELECT * FROM siswa';
-    const params = [];
+    let query = supabase.from('siswa').select('*').order('nama', { ascending: true });
+    
     if (kelas && kelas !== 'all') {
-      query += ' WHERE kelas LIKE ?';
-      params.push(`${kelas}%`);
+      query = query.like('kelas', `${kelas}%`);
     }
-    query += ' ORDER BY nama ASC';
-    const items = db.prepare(query).all(...params);
+    
+    const { data: items, error } = await query;
+    if (error) throw error;
+    
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -245,50 +299,65 @@ app.get('/api/siswa', (req, res) => {
 // ==========================================
 // 3. STATS & DASHBOARD
 // ==========================================
-app.get('/api/dashboard/stats', (req, res) => {
+app.get('/api/dashboard/stats', async (req, res) => {
   try {
     const kelas = req.query.kelas || '7';
     const namaSiswa = req.query.nama || 'Ahmad Fauzi';
 
-    const totalMateri = db.prepare('SELECT COUNT(*) as count FROM materi WHERE kelas = ?').get(kelas).count;
-    const totalJadwal = db.prepare('SELECT COUNT(*) as count FROM jadwal WHERE kelas LIKE ?').get(`${kelas}%`).count;
-    const totalKuis = db.prepare('SELECT COUNT(*) as count FROM kuis WHERE kelas = ?').get(kelas).count;
-    const totalUlangan = db.prepare('SELECT COUNT(*) as count FROM ulangan WHERE kelas = ?').get(kelas).count;
+    const [
+      { count: totalMateri },
+      { count: totalJadwal },
+      { count: totalKuis },
+      { count: totalUlangan },
+      { data: kehadiran },
+      { data: nilai },
+      { data: pengumuman },
+      { data: jadwalHariIni },
+      { count: totalSiswaSemua },
+      { count: totalNilaiUjian }
+    ] = await Promise.all([
+      supabase.from('materi').select('*', { count: 'exact', head: true }).eq('kelas', kelas),
+      supabase.from('jadwal').select('*', { count: 'exact', head: true }).like('kelas', `${kelas}%`),
+      supabase.from('kuis').select('*', { count: 'exact', head: true }).eq('kelas', kelas),
+      supabase.from('ulangan').select('*', { count: 'exact', head: true }).eq('kelas', kelas),
+      supabase.from('absensi').select('status').eq('nama_siswa', namaSiswa),
+      supabase.from('nilai').select('skor').eq('nama_siswa', namaSiswa),
+      supabase.from('pengumuman').select('*').order('id', { ascending: false }).limit(3),
+      supabase.from('jadwal').select('*').like('kelas', `${kelas}%`).order('id', { ascending: true }).limit(2),
+      supabase.from('siswa').select('*', { count: 'exact', head: true }),
+      supabase.from('nilai').select('*', { count: 'exact', head: true })
+    ]);
 
-    // Hitung kehadiran siswa
-    const kehadiran = db.prepare('SELECT status, COUNT(*) as count FROM absensi WHERE nama_siswa = ? GROUP BY status').all(namaSiswa);
-    const totalAbsen = kehadiran.reduce((acc, curr) => acc + curr.count, 0);
-    const totalHadir = (kehadiran.find(k => k.status === 'Hadir') || { count: 0 }).count;
+    const statusCounts = (kehadiran || []).reduce((acc, curr) => {
+      acc[curr.status] = (acc[curr.status] || 0) + 1;
+      return acc;
+    }, {});
+    
+    const totalAbsen = (kehadiran || []).length;
+    const totalHadir = statusCounts['Hadir'] || 0;
     const persentaseKehadiran = totalAbsen > 0 ? Math.round((totalHadir / totalAbsen) * 100) : 100;
 
-    // Nilai rata-rata
-    const avgScore = db.prepare('SELECT AVG(skor) as rata FROM nilai WHERE nama_siswa = ?').get(namaSiswa).rata || 88;
-
-    // Pengumuman terbaru dari Pak Bani
-    const pengumuman = db.prepare('SELECT * FROM pengumuman ORDER BY id DESC LIMIT 3').all();
-
-    // Jadwal hari ini / sesi aktif
-    const jadwalHariIni = db.prepare('SELECT * FROM jadwal WHERE kelas LIKE ? ORDER BY id ASC LIMIT 2').all(`${kelas}%`);
-
-    // Statistik Guru: Total siswa yang diajar & rekap kelulusan kuis
-    const totalSiswaSemua = db.prepare('SELECT COUNT(*) as count FROM siswa').get().count;
-    const totalNilaiUjian = db.prepare('SELECT COUNT(*) as count FROM nilai').get().count;
+    let avgScore = 88;
+    if (nilai && nilai.length > 0) {
+      const sum = nilai.reduce((acc, curr) => acc + curr.skor, 0);
+      avgScore = sum / nilai.length;
+    }
 
     res.json({
       success: true,
       data: {
-        totalMateri,
-        totalJadwal,
-        totalKuis,
-        totalUlangan,
+        totalMateri: totalMateri || 0,
+        totalJadwal: totalJadwal || 0,
+        totalKuis: totalKuis || 0,
+        totalUlangan: totalUlangan || 0,
         persentaseKehadiran,
         totalHadir,
         totalAbsen,
         rataRataNilai: Math.round(avgScore),
-        jadwalHariIni,
-        pengumuman,
-        totalSiswaSemua,
-        totalNilaiUjian
+        jadwalHariIni: jadwalHariIni || [],
+        pengumuman: pengumuman || [],
+        totalSiswaSemua: totalSiswaSemua || 0,
+        totalNilaiUjian: totalNilaiUjian || 0
       }
     });
   } catch (error) {
@@ -299,56 +368,57 @@ app.get('/api/dashboard/stats', (req, res) => {
 // ==========================================
 // 4. MODUL MATERI PEMBELAJARAN
 // ==========================================
-app.get('/api/materi', (req, res) => {
+app.get('/api/materi', async (req, res) => {
   try {
     const { kelas, kategori, search } = req.query;
-    let query = 'SELECT * FROM materi WHERE 1=1';
-    const params = [];
+    let query = supabase.from('materi').select('*')
+      .order('kelas', { ascending: true })
+      .order('bab', { ascending: true })
+      .order('urutan', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query += ' AND kelas = ?';
-      params.push(Number(kelas));
+      query = query.eq('kelas', Number(kelas));
     }
     if (kategori && kategori !== 'all') {
-      query += ' AND kategori = ?';
-      params.push(kategori);
+      query = query.eq('kategori', kategori);
     }
     if (search) {
-      query += ' AND (judul LIKE ? OR deskripsi LIKE ? OR konten LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      query = query.or(`judul.ilike.%${search}%,deskripsi.ilike.%${search}%,konten.ilike.%${search}%`);
     }
 
-    query += ' ORDER BY kelas ASC, bab ASC, urutan ASC';
-    const items = db.prepare(query).all(...params);
+    const { data: items, error } = await query;
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-app.get('/api/materi/:id', (req, res) => {
+app.get('/api/materi/:id', async (req, res) => {
   try {
-    const item = db.prepare('SELECT * FROM materi WHERE id = ?').get(req.params.id);
-    if (!item) return res.status(404).json({ success: false, message: 'Materi tidak ditemukan' });
-    res.json({ success: true, data: item });
+    const { data: items, error } = await supabase.from('materi').select('*').eq('id', req.params.id).limit(1);
+    if (error) throw error;
+    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Materi tidak ditemukan' });
+    res.json({ success: true, data: items[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-app.post('/api/materi', (req, res) => {
+app.post('/api/materi', async (req, res) => {
   try {
     const { kelas, bab, judul, kategori, ayat_arab, arti_ayat, deskripsi, konten, rujukan } = req.body;
     if (!kelas || !bab || !judul || !konten) {
       return res.status(400).json({ success: false, message: 'Data wajib diisi (kelas, bab, judul, konten)' });
     }
 
-    const insert = db.prepare(`
-      INSERT INTO materi (kelas, bab, judul, kategori, ayat_arab, arti_ayat, deskripsi, konten, rujukan)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    const { error } = await supabase.from('materi').insert([{
+      kelas, bab, judul, kategori: kategori || 'Umum', 
+      ayat_arab: ayat_arab || '', arti_ayat: arti_ayat || '', 
+      deskripsi: deskripsi || '', konten, rujukan: rujukan || ''
+    }]);
 
-    insert.run(kelas, bab, judul, kategori || 'Umum', ayat_arab || '', arti_ayat || '', deskripsi || '', konten, rujukan || '');
+    if (error) throw error;
     res.json({ success: true, message: 'Materi berhasil ditambahkan oleh Pak Bani' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -358,23 +428,20 @@ app.post('/api/materi', (req, res) => {
 // ==========================================
 // 5. JADWAL PELAJARAN
 // ==========================================
-app.get('/api/jadwal', (req, res) => {
+app.get('/api/jadwal', async (req, res) => {
   try {
     const { kelas, hari } = req.query;
-    let query = 'SELECT * FROM jadwal WHERE 1=1';
-    const params = [];
+    let query = supabase.from('jadwal').select('*').order('id', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query += ' AND kelas LIKE ?';
-      params.push(`${kelas}%`);
+      query = query.like('kelas', `${kelas}%`);
     }
     if (hari && hari !== 'all') {
-      query += ' AND hari = ?';
-      params.push(hari);
+      query = query.eq('hari', hari);
     }
 
-    query += ' ORDER BY id ASC';
-    const items = db.prepare(query).all(...params);
+    const { data: items, error } = await query;
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -384,27 +451,24 @@ app.get('/api/jadwal', (req, res) => {
 // ==========================================
 // 6. ABSENSI BULANAN & PENGELOLAAN GURU
 // ==========================================
-app.get('/api/absensi/bulanan', (req, res) => {
+app.get('/api/absensi/bulanan', async (req, res) => {
   try {
     const kelas = req.query.kelas || '7-A';
     const bulan = req.query.bulan || new Date().toISOString().substring(0, 7);
 
-    const siswaList = db.prepare('SELECT * FROM siswa WHERE kelas = ? ORDER BY nama ASC').all(kelas);
-
-    const records = db.prepare(`
-      SELECT * FROM absensi 
-      WHERE kelas = ? AND tanggal LIKE ?
-      ORDER BY tanggal ASC, nama_siswa ASC
-    `).all(kelas, `${bulan}%`);
+    const [{ data: siswaList }, { data: records }] = await Promise.all([
+      supabase.from('siswa').select('*').eq('kelas', kelas).order('nama', { ascending: true }),
+      supabase.from('absensi').select('*').eq('kelas', kelas).like('tanggal', `${bulan}%`).order('tanggal', { ascending: true }).order('nama_siswa', { ascending: true })
+    ]);
 
     const tanggalSet = new Set();
-    records.forEach(r => tanggalSet.add(r.tanggal));
+    (records || []).forEach(r => tanggalSet.add(r.tanggal));
     const tanggalList = Array.from(tanggalSet).sort();
 
     const matrix = {};
     const rekapSiswa = {};
 
-    siswaList.forEach(s => {
+    (siswaList || []).forEach(s => {
       matrix[s.nama] = {};
       rekapSiswa[s.nama] = {
         nisn: s.nisn,
@@ -418,10 +482,8 @@ app.get('/api/absensi/bulanan', (req, res) => {
       };
     });
 
-    records.forEach(r => {
-      if (!matrix[r.nama_siswa]) {
-        matrix[r.nama_siswa] = {};
-      }
+    (records || []).forEach(r => {
+      if (!matrix[r.nama_siswa]) matrix[r.nama_siswa] = {};
       matrix[r.nama_siswa][r.tanggal] = {
         status: r.status,
         keterangan: r.keterangan,
@@ -448,7 +510,7 @@ app.get('/api/absensi/bulanan', (req, res) => {
     });
 
     let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
-    records.forEach(r => {
+    (records || []).forEach(r => {
       if (r.status === 'Hadir') totalH++;
       else if (r.status === 'Sakit') totalS++;
       else if (r.status === 'Izin') totalI++;
@@ -470,7 +532,7 @@ app.get('/api/absensi/bulanan', (req, res) => {
       data: {
         kelas,
         bulan,
-        daftarSiswa: siswaList,
+        daftarSiswa: siswaList || [],
         tanggalList,
         matrix,
         rekapSiswa,
@@ -482,7 +544,7 @@ app.get('/api/absensi/bulanan', (req, res) => {
   }
 });
 
-app.post('/api/absensi/batch', (req, res) => {
+app.post('/api/absensi/batch', async (req, res) => {
   try {
     const { kelas, tanggal, listAbsensi } = req.body;
     if (!kelas || !tanggal || !Array.isArray(listAbsensi)) {
@@ -491,21 +553,38 @@ app.post('/api/absensi/batch', (req, res) => {
 
     const waktu = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
-    const checkExist = db.prepare('SELECT id FROM absensi WHERE kelas = ? AND tanggal = ? AND nama_siswa = ?');
-    const updateStmt = db.prepare('UPDATE absensi SET status = ?, keterangan = ?, waktu = ? WHERE id = ?');
-    const insertStmt = db.prepare(`
-      INSERT INTO absensi (kelas, nama_siswa, nisn, tanggal, status, keterangan, waktu)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
+    for (const item of listAbsensi) {
+      const { data: exist } = await supabase
+        .from('absensi')
+        .select('id')
+        .eq('kelas', kelas)
+        .eq('tanggal', tanggal)
+        .eq('nama_siswa', item.nama_siswa)
+        .limit(1);
 
-    listAbsensi.forEach(item => {
-      const exist = checkExist.get(kelas, tanggal, item.nama_siswa);
-      if (exist) {
-        updateStmt.run(item.status, item.keterangan || (item.status === 'Hadir' ? 'Hadir di kelas' : item.status), waktu, exist.id);
+      if (exist && exist.length > 0) {
+        await supabase
+          .from('absensi')
+          .update({
+            status: item.status,
+            keterangan: item.keterangan || (item.status === 'Hadir' ? 'Hadir di kelas' : item.status),
+            waktu
+          })
+          .eq('id', exist[0].id);
       } else {
-        insertStmt.run(kelas, item.nama_siswa, item.nisn || '', tanggal, item.status, item.keterangan || (item.status === 'Hadir' ? 'Hadir di kelas' : item.status), waktu);
+        await supabase
+          .from('absensi')
+          .insert([{
+            kelas,
+            nama_siswa: item.nama_siswa,
+            nisn: item.nisn || '',
+            tanggal,
+            status: item.status,
+            keterangan: item.keterangan || (item.status === 'Hadir' ? 'Hadir di kelas' : item.status),
+            waktu
+          }]);
       }
-    });
+    }
 
     res.json({
       success: true,
@@ -519,31 +598,33 @@ app.post('/api/absensi/batch', (req, res) => {
 // ==========================================
 // 7. KUIS INTERAKTIF
 // ==========================================
-app.get('/api/kuis', (req, res) => {
+app.get('/api/kuis', async (req, res) => {
   try {
     const { kelas } = req.query;
-    let query = 'SELECT id, kelas, bab, judul, kategori, durasi_menit FROM kuis';
-    const params = [];
+    let query = supabase.from('kuis').select('id, kelas, bab, judul, kategori, durasi_menit')
+      .order('kelas', { ascending: true })
+      .order('bab', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query += ' WHERE kelas = ?';
-      params.push(Number(kelas));
+      query = query.eq('kelas', Number(kelas));
     }
-    query += ' ORDER BY kelas ASC, bab ASC';
-    const items = db.prepare(query).all(...params);
-
+    
+    const { data: items, error } = await query;
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-app.get('/api/kuis/:id', (req, res) => {
+app.get('/api/kuis/:id', async (req, res) => {
   try {
-    const item = db.prepare('SELECT * FROM kuis WHERE id = ?').get(req.params.id);
-    if (!item) return res.status(404).json({ success: false, message: 'Kuis tidak ditemukan' });
+    const { data: items, error } = await supabase.from('kuis').select('*').eq('id', req.params.id).limit(1);
+    if (error) throw error;
+    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Kuis tidak ditemukan' });
 
-    item.soal = JSON.parse(item.soal_json);
+    const item = items[0];
+    item.soal = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
     delete item.soal_json;
     res.json({ success: true, data: item });
   } catch (error) {
@@ -551,14 +632,17 @@ app.get('/api/kuis/:id', (req, res) => {
   }
 });
 
-app.post('/api/kuis/submit', (req, res) => {
+app.post('/api/kuis/submit', async (req, res) => {
   try {
     const { kuis_id, nama_siswa, kelas, jawaban } = req.body;
-    const item = db.prepare('SELECT * FROM kuis WHERE id = ?').get(kuis_id);
-    if (!item) return res.status(404).json({ success: false, message: 'Kuis tidak ditemukan' });
+    const { data: items, error: kuisError } = await supabase.from('kuis').select('*').eq('id', kuis_id).limit(1);
+    if (kuisError) throw kuisError;
+    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Kuis tidak ditemukan' });
 
-    const soalList = JSON.parse(item.soal_json);
+    const item = items[0];
+    const soalList = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
     let jawabanBenar = 0;
+    
     const evaluasi = soalList.map((s) => {
       const userAns = jawaban[s.id] !== undefined ? jawaban[s.id] : -1;
       const isCorrect = userAns === s.kunci;
@@ -578,11 +662,18 @@ app.post('/api/kuis/submit', (req, res) => {
     const skor = Math.round((jawabanBenar / totalSoal) * 100);
     const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
 
-    const insertNilai = db.prepare(`
-      INSERT INTO nilai (tipe, ref_id, nama_siswa, kelas, skor, total_soal, jawaban_benar, waktu_selesai)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    insertNilai.run('kuis', kuis_id, nama_siswa || 'Siswa PAI', String(kelas || item.kelas), skor, totalSoal, jawabanBenar, now);
+    const { error: insertError } = await supabase.from('nilai').insert([{
+      tipe: 'kuis',
+      ref_id: kuis_id,
+      nama_siswa: nama_siswa || 'Siswa PAI',
+      kelas: String(kelas || item.kelas),
+      skor,
+      total_soal: totalSoal,
+      jawaban_benar: jawabanBenar,
+      waktu_selesai: now
+    }]);
+    
+    if (insertError) throw insertError;
 
     res.json({
       success: true,
@@ -602,31 +693,33 @@ app.post('/api/kuis/submit', (req, res) => {
 // ==========================================
 // 8. ULANGAN ONLINE (CBT)
 // ==========================================
-app.get('/api/ulangan', (req, res) => {
+app.get('/api/ulangan', async (req, res) => {
   try {
     const { kelas } = req.query;
-    let query = 'SELECT id, kelas, jenis, judul, durasi_menit, token_ujian FROM ulangan';
-    const params = [];
+    let query = supabase.from('ulangan').select('id, kelas, jenis, judul, durasi_menit, token_ujian')
+      .order('kelas', { ascending: true })
+      .order('id', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query += ' WHERE kelas = ?';
-      params.push(Number(kelas));
+      query = query.eq('kelas', Number(kelas));
     }
-    query += ' ORDER BY kelas ASC, id ASC';
-    const items = db.prepare(query).all(...params);
-
+    
+    const { data: items, error } = await query;
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-app.get('/api/ulangan/:id', (req, res) => {
+app.get('/api/ulangan/:id', async (req, res) => {
   try {
-    const item = db.prepare('SELECT * FROM ulangan WHERE id = ?').get(req.params.id);
-    if (!item) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
+    const { data: items, error } = await supabase.from('ulangan').select('*').eq('id', req.params.id).limit(1);
+    if (error) throw error;
+    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
 
-    item.soal = JSON.parse(item.soal_json);
+    const item = items[0];
+    item.soal = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
     delete item.soal_json;
     res.json({ success: true, data: item });
   } catch (error) {
@@ -634,13 +727,15 @@ app.get('/api/ulangan/:id', (req, res) => {
   }
 });
 
-app.post('/api/ulangan/submit', (req, res) => {
+app.post('/api/ulangan/submit', async (req, res) => {
   try {
     const { ulangan_id, nama_siswa, kelas, jawaban } = req.body;
-    const item = db.prepare('SELECT * FROM ulangan WHERE id = ?').get(ulangan_id);
-    if (!item) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
+    const { data: items, error: fetchError } = await supabase.from('ulangan').select('*').eq('id', ulangan_id).limit(1);
+    if (fetchError) throw fetchError;
+    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
 
-    const soalList = JSON.parse(item.soal_json);
+    const item = items[0];
+    const soalList = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
     let jawabanBenar = 0;
     const totalSoal = soalList.length;
 
@@ -661,11 +756,18 @@ app.post('/api/ulangan/submit', (req, res) => {
     const skor = Math.round((jawabanBenar / totalSoal) * 100);
     const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
 
-    const insertNilai = db.prepare(`
-      INSERT INTO nilai (tipe, ref_id, nama_siswa, kelas, skor, total_soal, jawaban_benar, waktu_selesai)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    insertNilai.run('ulangan', ulangan_id, nama_siswa || 'Siswa PAI', String(kelas || item.kelas), skor, totalSoal, jawabanBenar, now);
+    const { error: insertError } = await supabase.from('nilai').insert([{
+      tipe: 'ulangan',
+      ref_id: ulangan_id,
+      nama_siswa: nama_siswa || 'Siswa PAI',
+      kelas: String(kelas || item.kelas),
+      skor,
+      total_soal: totalSoal,
+      jawaban_benar: jawabanBenar,
+      waktu_selesai: now
+    }]);
+
+    if (insertError) throw insertError;
 
     res.json({
       success: true,
@@ -686,23 +788,20 @@ app.post('/api/ulangan/submit', (req, res) => {
 // ==========================================
 // 9. NILAI & REKAP
 // ==========================================
-app.get('/api/nilai', (req, res) => {
+app.get('/api/nilai', async (req, res) => {
   try {
     const { nama, kelas } = req.query;
-    let query = 'SELECT * FROM nilai WHERE 1=1';
-    const params = [];
+    let query = supabase.from('nilai').select('*').order('id', { ascending: false });
 
     if (nama) {
-      query += ' AND nama_siswa = ?';
-      params.push(nama);
+      query = query.eq('nama_siswa', nama);
     }
     if (kelas && kelas !== 'all') {
-      query += ' AND kelas = ?';
-      params.push(String(kelas));
+      query = query.eq('kelas', String(kelas));
     }
 
-    query += ' ORDER BY id DESC';
-    const items = db.prepare(query).all(...params);
+    const { data: items, error } = await query;
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -712,9 +811,10 @@ app.get('/api/nilai', (req, res) => {
 // ==========================================
 // 10. PENGUMUMAN
 // ==========================================
-app.get('/api/pengumuman', (req, res) => {
+app.get('/api/pengumuman', async (req, res) => {
   try {
-    const items = db.prepare('SELECT * FROM pengumuman ORDER BY id DESC').all();
+    const { data: items, error } = await supabase.from('pengumuman').select('*').order('id', { ascending: false });
+    if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
