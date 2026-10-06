@@ -200,12 +200,12 @@ export default function UserManagement() {
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">Paste Data Siswa (Format: NISN [TAB/KOMA] Nama Lengkap)</label>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Paste Data Siswa (Cukup Daftar Nama Lengkap)</label>
               <textarea
                 required rows="6"
                 value={bulkForm.rawData}
                 onChange={(e) => setBulkForm({ ...bulkForm, rawData: e.target.value })}
-                placeholder="0012345678  Ahmad Fauzi\n0087654321  Budi Santoso\nAtau cukup copy 2 kolom (NISN dan Nama) dari Ms Excel lalu paste di sini."
+                placeholder="Ahmad Fauzi\nBudi Santoso\nSiti Aminah\n\n(Cukup copy 1 kolom berisi daftar nama dari Excel lalu paste di sini)"
                 className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono whitespace-pre"
               />
             </div>
