@@ -252,7 +252,7 @@ export default function GuruAdminPage() {
                   <option value="Al-Qur'an & Hadis">Al-Qur'an & Hadis</option>
                   <option value="Akidah">Akidah</option>
                   <option value="Akhlak">Akhlak</option>
-                  <option value="Pendidikan Agama Kristen (PAK)">Pendidikan Agama Kristen (PAK)</option>
+                  <option value="Pendidikan Anti Korupsi (PAK)">Pendidikan Anti Korupsi (PAK)</option>
                   <option value="Fiqih Ibadah">Fiqih Ibadah</option>
                   <option value="Sejarah Kebudayaan Islam">Sejarah Kebudayaan Islam</option>
                 </select>

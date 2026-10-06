@@ -17,7 +17,7 @@ export default function MateriPage() {
   const [fontSize, setFontSize] = useState('text-base'); // text-sm, text-base, text-lg
 
   const categories = [
-    { id: 'all', label: 'Semua Bab' },{ id: 'Pendidikan Agama Kristen (PAK)', label: 'PAK' },
+    { id: 'all', label: 'Semua Bab' },{ id: 'Pendidikan Anti Korupsi (PAK)', label: 'PAK' },
     { id: 'Al-Qur\'an & Hadis', label: 'Al-Qur\'an & Hadis' },
     { id: 'Akidah', label: 'Akidah' },
     { id: 'Akhlak', label: 'Akhlak' },
