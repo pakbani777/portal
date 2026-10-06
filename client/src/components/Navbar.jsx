@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { BookOpen, UserCheck, ShieldCheck, GraduationCap, Sparkles, User as UserIcon } from 'lucide-react';
+import { BookOpen, UserCheck, ShieldCheck, GraduationCap, Sparkles, User as UserIcon, Menu, X } from 'lucide-react';
 import { sounds } from './AudioCues';
 import ProfileModal from './ProfileModal';
 import { API_BASE_URL } from '../config';
 
 export default function Navbar() {
-  const { activeRole, setActiveRole, activeKelas, setActiveKelas, currentUser, showToast, logout } = useApp();
+  const { isMobileMenuOpen, setIsMobileMenuOpen, activeRole, setActiveRole, activeKelas, setActiveKelas, currentUser, showToast, logout } = useApp();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleRoleToggle = () => {

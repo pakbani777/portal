@@ -17,7 +17,10 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200/80 p-4 sticky top-16 h-[calc(100vh-4rem)]">
+    <aside className={`
+      fixed md:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 bg-white border-r border-slate-200/80 p-4 flex flex-col transition-transform duration-300 ease-in-out
+      ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+    `}>
       
       <div className="mb-3 px-3">
         <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">

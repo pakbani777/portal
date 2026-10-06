@@ -52,6 +52,14 @@ function MainContent() {
         {/* Desktop Sidebar */}
         <Sidebar />
 
+        {/* Overlay for mobile sidebar */}
+        {isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/50 z-30 md:hidden backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Dynamic Page Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
           {renderTabContent()}

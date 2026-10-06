@@ -48,6 +48,7 @@ export function AppProvider({ children }) {
 
   // Toast notification
   const [toast, setToast] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('pai_kelas', activeKelas);
@@ -109,6 +110,8 @@ export function AppProvider({ children }) {
         setActiveKelas,
         activeTab,
         setActiveTab: switchTab,
+      isMobileMenuOpen,
+      setIsMobileMenuOpen,
         activeMateriDetailId,
         setActiveMateriDetailId,
         activeKuisId,
