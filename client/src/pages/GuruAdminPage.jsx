@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai, createMateri, createPengumuman } from '../services/api';
+import { fetchNilai, createMateri, createPengumuman, createTugas } from '../services/api';
 import { Settings, PlusCircle, Download, Send, ShieldCheck } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
@@ -109,6 +109,28 @@ export default function GuruAdminPage() {
   };
 
   const [activeAdminTab, setActiveAdminTab] = useState('materi_nilai');
+
+  const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas });
+  const [submittingTugas, setSubmittingTugas] = useState(false);
+  
+  const handleTugasSubmit = async (e) => {
+    e.preventDefault();
+    if (!formTugas.judul || !formTugas.deskripsi || !formTugas.deadline) return showToast('Semua kolom tugas harus diisi');
+    setSubmittingTugas(true);
+    try {
+      const res = await createTugas({ ...formTugas, kelas: activeKelas });
+      if (res.success) {
+        showToast('Tugas berhasil dibuat!');
+        setFormTugas({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas });
+      } else {
+        showToast(res.message);
+      }
+    } catch (e) {
+      showToast('Gagal membuat tugas');
+    }
+    setSubmittingTugas(false);
+  };
+
 
   const [formPengumuman, setFormPengumuman] = useState({ judul: '', isi: '', tipe: 'info' });
   const [submittingPengumuman, setSubmittingPengumuman] = useState(false);
@@ -429,6 +451,38 @@ export default function GuruAdminPage() {
       </div>
       )}
       {activeAdminTab === 'users' && <UserManagement />}
+
+        {activeAdminTab === 'tugas' && (
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm animate-in fade-in">
+            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2 mb-4">
+              📝 Buat Tugas Baru
+            </h2>
+            <form onSubmit={handleTugasSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Judul Tugas</label>
+                <input type="text" value={formTugas.judul} onChange={e => setFormTugas({...formTugas, judul: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Batas Waktu (Deadline)</label>
+                  <input type="datetime-local" value={formTugas.deadline} onChange={e => setFormTugas({...formTugas, deadline: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Target Kelas</label>
+                  <input type="text" value={activeKelas} disabled className="w-full px-4 py-2 rounded-xl bg-slate-200 border border-slate-300 text-sm opacity-70" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Instruksi Tugas</label>
+                <textarea rows="4" value={formTugas.deskripsi} onChange={e => setFormTugas({...formTugas, deskripsi: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
+              </div>
+              <button type="submit" disabled={submittingTugas} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl cursor-pointer">
+                {submittingTugas ? 'Membuat...' : 'Terbitkan Tugas'}
+              </button>
+            </form>
+          </div>
+        )}
+
     </div>
   );
 }

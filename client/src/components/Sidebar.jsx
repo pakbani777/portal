@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LayoutDashboard, BookOpen, Calendar, UserCheck, Award, FileSpreadsheet, Settings, Sparkles , LogOut} from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut } from 'lucide-react';
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {

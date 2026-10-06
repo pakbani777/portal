@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar';
 
 import Dashboard from './pages/Dashboard';
 import MateriPage from './pages/MateriPage';
-import JadwalPage from './pages/JadwalPage';
+import TugasPage from './pages/TugasPage';
 import AbsensiPage from './pages/AbsensiPage';
 import KuisPage from './pages/KuisPage';
 import UlanganPage from './pages/UlanganPage';
