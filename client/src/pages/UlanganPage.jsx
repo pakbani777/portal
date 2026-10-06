@@ -515,7 +515,7 @@ export default function UlanganPage() {
         </div>
 
         {/* Filter Kelas */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
+        {currentUser?.role !== 'siswa' && (<div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
           {['7', '8', '9'].map((kls) => (
             <button
               key={kls}
@@ -532,7 +532,7 @@ export default function UlanganPage() {
               Kelas {kls}
             </button>
           ))}
-        </div>
+        </div>)}
       </div>
 
       {/* Grid Paket Ulangan */}

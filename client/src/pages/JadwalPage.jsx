@@ -5,7 +5,7 @@ import { Calendar, Clock, MapPin, User, Video, CheckCircle2, AlertCircle, ArrowR
 import { sounds } from '../components/AudioCues';
 
 export default function JadwalPage() {
-  const { activeKelas, setActiveKelas, setActiveTab } = useApp();
+  const { currentUser, activeKelas, setActiveKelas, setActiveTab } = useApp();
   const [jadwalList, setJadwalList] = useState([]);
   const [selectedHari, setSelectedHari] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function JadwalPage() {
         </div>
 
         {/* Filter Jenjang Kelas 7, 8, 9 */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
+        {currentUser?.role !== 'siswa' && (<div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
           {['7', '8', '9'].map((kls) => (
             <button
               key={kls}
@@ -69,7 +69,7 @@ export default function JadwalPage() {
               Kelas {kls}
             </button>
           ))}
-        </div>
+        </div>)}
       </div>
 
       {/* Filter Hari */}
