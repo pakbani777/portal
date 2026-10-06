@@ -110,18 +110,18 @@ export default function GuruAdminPage() {
 
   const [activeAdminTab, setActiveAdminTab] = useState('materi_nilai');
 
-  const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas });
+  const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
   const [submittingTugas, setSubmittingTugas] = useState(false);
   
   const handleTugasSubmit = async (e) => {
     e.preventDefault();
-    if (!formTugas.judul || !formTugas.deskripsi || !formTugas.deadline) return showToast('Semua kolom tugas harus diisi');
+    if (!formTugas.judul || !formTugas.deskripsi || !formTugas.deadline || !formTugas.link_tugas) return showToast('Semua kolom tugas harus diisi termasuk link tugas');
     setSubmittingTugas(true);
     try {
       const res = await createTugas({ ...formTugas, kelas: activeKelas });
       if (res.success) {
         showToast('Tugas berhasil dibuat!');
-        setFormTugas({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas });
+        setFormTugas({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
       } else {
         showToast(res.message);
       }

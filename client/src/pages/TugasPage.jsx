@@ -93,12 +93,17 @@ export default function TugasPage() {
               <p className="text-xs text-slate-600 mb-4 line-clamp-3">{tugas.deskripsi}</p>
               
               <div className="mt-auto">
-                <button
-                  onClick={() => handleUploadClick(tugas)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  <Upload className="w-4 h-4" /> Kumpulkan Tugas
-                </button>
+                
+                  <a
+                    href={tugas.link_tugas || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => sounds.playClick()}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <Upload className="w-4 h-4" /> Kumpulkan Tugas
+                  </a>
+
               </div>
             </div>
           ))

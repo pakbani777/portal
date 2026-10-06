@@ -893,9 +893,9 @@ app.get('/api/tugas', async (req, res) => {
 
 app.post('/api/tugas', async (req, res) => {
   try {
-    const { judul, deskripsi, deadline, kelas } = req.body;
+    const { judul, deskripsi, deadline, kelas, link_tugas } = req.body;
     const { data: inserted, error } = await supabase.from('tugas').insert([{
-      judul, deskripsi, deadline, kelas: String(kelas)
+      judul, deskripsi, deadline, kelas: String(kelas), link_tugas
     }]).select();
     if (error) throw error;
     res.json({ success: true, data: inserted[0] });
