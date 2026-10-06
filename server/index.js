@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 });
 
 // Pastikan folder uploads ada
-const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp' : path.join(__dirname, 'public/uploads');
+const uploadDir = process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.NETLIFY ? '/tmp' : path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
