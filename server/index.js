@@ -823,15 +823,6 @@ app.get('/api/pengumuman', async (req, res) => {
 
 // Serving static frontend jika dist tersedia
 const distPath = path.join(__dirname, '../client/dist');
-app.use(express.static(distPath));
-
-  }
-  res.sendFile(path.join(distPath, 'index.html'), (err) => {
-    if (err) {
-      res.send('Backend API Server Portal PakBani aktif pada port ' + PORT + '.');
-    }
-  });
-});
 module.exports = app;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
