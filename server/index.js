@@ -835,7 +835,7 @@ app.get('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+const serverless = require('serverless-http'); module.exports.handler = serverless(app); app.listen(PORT, () => {
   console.log(`===============================================`);
   console.log(`🚀 Server Portal PakBani aktif di http://localhost:${PORT}`);
   console.log(`===============================================`);
