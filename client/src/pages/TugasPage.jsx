@@ -116,50 +116,7 @@ export default function TugasPage() {
         )}
       </div>
 
-      {/* Modal Upload */}
-      {selectedTugas && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl relative animate-in zoom-in-95">
-            <button 
-              onClick={() => setSelectedTugas(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full cursor-pointer"
-            >
-              x
-            </button>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Upload Tugas</h3>
-            <p className="text-xs text-slate-500 mb-4">{selectedTugas.judul}</p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Link File Tugas (Gdrive / Dokumen)</label>
-                <input
-                  type="url" required
-                  value={fileUrl}
-                  onChange={(e) => setFileUrl(e.target.value)}
-                  placeholder="https://docs.google.com/..."
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Catatan Tambahan (Opsional)</label>
-                <textarea
-                  rows="3"
-                  value={catatan}
-                  onChange={(e) => setCatatan(e.target.value)}
-                  placeholder="Pesan untuk guru..."
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <button
-                type="submit" disabled={submitting}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-600/20 cursor-pointer disabled:opacity-50"
-              >
-                {submitting ? 'Mengirim...' : 'Kirim Tugas Sekarang'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      
 
     </div>
   );

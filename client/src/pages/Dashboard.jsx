@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { fetchStats } from '../services/api';
-import { BookOpen, Calendar, UserCheck, Award, ArrowRight, Bell, Sparkles, Clock, CheckCircle2, Video } from 'lucide-react';
+import { BookOpen, Calendar, UserCheck, Award, ArrowRight, Bell, Sparkles, Clock, CheckCircle2, Video, FileText } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 
 export default function Dashboard() {
@@ -143,24 +143,24 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-blue-600" />
               <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Jadwal KBM PAI Terdekat
+                Tugas PAI Terdekat
               </h2>
             </div>
             <button
-              onClick={() => setActiveTab('jadwal')}
+              onClick={() => setActiveTab('tugas')}
               className="text-xs font-semibold text-blue-800 hover:text-blue-900 flex items-center gap-1"
             >
-              Lihat Semua Jadwal <ArrowRight className="w-3.5 h-3.5" />
+              Lihat Semua Tugas <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="space-y-3">
             {loading ? (
               <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs">
-                Memuat jadwal KBM...
+                Memuat tugas...
               </div>
-            ) : stats?.jadwalHariIni && stats.jadwalHariIni.length > 0 ? (
-              stats.jadwalHariIni.map((j) => (
+            ) : stats?.tugasTerbaru && stats.tugasTerbaru.length > 0 ? (
+              stats.tugasTerbaru.map((j) => (
                 <div
                   key={j.id}
                   className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-blue-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
@@ -210,7 +210,7 @@ export default function Dashboard() {
               ))
             ) : (
               <div className="p-6 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
-                Tidak ada sesi jadwal aktif untuk hari ini.
+                Tidak ada tugas yang menunggu.
               </div>
             )}
           </div>

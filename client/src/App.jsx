@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import MateriPage from './pages/MateriPage';
 import TugasPage from './pages/TugasPage';
 import AbsensiPage from './pages/AbsensiPage';
-import KuisPage from './pages/KuisPage';
+
 import UlanganPage from './pages/UlanganPage';
 import GuruAdminPage from './pages/GuruAdminPage';
 import LoginPage from './pages/LoginPage';
@@ -26,13 +26,11 @@ function MainContent() {
         return <Dashboard />;
       case 'materi':
         return <MateriPage />;
-      case 'jadwal':
-        return <JadwalPage />;
       case 'absensi':
         return <AbsensiPage />;
-      case 'kuis':
-        return <KuisPage />;
-      case 'ulangan':
+      case 'tugas':
+        return <TugasPage />;
+case 'ulangan':
         return <UlanganPage />;
       case 'admin':
         return <GuruAdminPage />;
