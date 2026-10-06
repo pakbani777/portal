@@ -42,9 +42,7 @@ export default function Navbar() {
                 <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900">
                   Portal <span className="text-blue-700 font-black">PakBani</span>
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                  PAI SMP
-                </span>
+                
               </div>
               <p className="text-[11px] text-slate-500 hidden sm:block">
                 Pendidikan Agama Islam & Budi Pekerti
@@ -60,15 +58,7 @@ export default function Navbar() {
               <span className="text-xs font-semibold text-slate-500 pl-2 pr-1 hidden sm:inline">
                 Jenjang:
               </span>
-              <select
-                value={activeKelas}
-                onChange={handleKelasChange}
-                className="bg-transparent text-xs font-bold text-slate-800 py-1.5 px-2 rounded-lg cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="7">Kelas 7</option>
-                <option value="8">Kelas 8</option>
-                <option value="9">Kelas 9</option>
-              </select>
+              {currentUser?.role === 'siswa' ? <span className="bg-transparent text-xs font-bold text-slate-800 py-1.5 px-2">Kelas {activeKelas}</span> : <select value={activeKelas} onChange={handleKelasChange} className="bg-transparent text-xs font-bold text-slate-800 py-1.5 px-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option></select>}
             </div>
 
             {/* Quick Switch Role: Siswa / Guru (Hanya untuk Demo) */}

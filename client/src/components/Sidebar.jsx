@@ -1,10 +1,10 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LayoutDashboard, BookOpen, Calendar, UserCheck, Award, FileSpreadsheet, Settings, Sparkles } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Calendar, UserCheck, Award, FileSpreadsheet, Settings, Sparkles , LogOut} from 'lucide-react';
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {
-  const { activeTab, setActiveTab, activeRole, activeKelas, isMobileMenuOpen, setIsMobileMenuOpen } = useApp();
+  const { activeTab, setActiveTab, activeRole, activeKelas, isMobileMenuOpen, setIsMobileMenuOpen, logout } = useApp();
 
   const navItems = [
     { id: 'dashboard', label: 'Beranda', desc: 'Ringkasan & KBM', icon: LayoutDashboard },
@@ -64,6 +64,21 @@ export default function Sidebar() {
       </nav>
 
       {/* Widget Hikmah Islami Harian */}
+      
+      {/* Tombol Logout (Mobile) */}
+      <div className="md:hidden mt-3 p-3 pt-0">
+        <button 
+          onClick={() => {
+            setIsMobileMenuOpen(false);
+            logout();
+          }}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Keluar (Logout)
+        </button>
+      </div>
+
       <div className="mt-auto p-3.5 rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100/80">
         <div className="flex items-center gap-2 mb-1.5">
           <Sparkles className="w-4 h-4 text-blue-600" />
