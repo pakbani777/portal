@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Siswa — Portal PakBani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2315803d'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  <!-- Google Fonts: Plus Jakarta Sans & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard-siswa.css" />
+</head>
+<body>
+
+<div class="dashboard active">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width="24" height="24" fill='white'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
+      </div>
+      <div>
+        <div class="sidebar-brand-name">Portal PakBani</div>
+        <div class="sidebar-brand-sub">SMPN 1 Example</div>
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="siswaAvatar">S</div>
+      <div>
+        <div class="sidebar-user-name" id="siswaNama">Nama Siswa</div>
+        <div class="sidebar-user-role" id="siswaKelasSpan">Kelas -</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Menu Utama</div>
+      <div class="sidebar-nav-item active" data-page="beranda">
+        <span class="nav-icon">🏠</span> Beranda
+      </div>
+      <div class="sidebar-nav-item" data-page="materi">
+        <span class="nav-icon">📖</span> Materi PAI
+      </div>
+      <div class="sidebar-nav-item" data-page="ujian">
+        <span class="nav-icon">✍️</span> Ujian CBT
+        <span class="nav-badge" id="badgeUjian">0</span>
+      </div>
+      <div class="sidebar-nav-item" data-page="tugas">
+        <span class="nav-icon">📤</span> Kumpul Tugas
+        <span class="nav-badge" id="badgeTugas">0</span>
+      </div>
+
+      <div class="nav-section-label">Akademik</div>
+      <div class="sidebar-nav-item" data-page="nilai">
+        <span class="nav-icon">📊</span> Hasil Nilai
+      </div>
+      <div class="sidebar-nav-item" data-page="absensi">
+        <span class="nav-icon">📅</span> Info Absensi
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-outline btn-full btn-sm" id="btnLogout" style="border-color:rgba(255,255,255,.2); color:white;">
+        Keluar
+      </button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="topbar-title" id="topbarTitle">🏠 Beranda Siswa</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-time" id="topbarTime">Senin, 10 Okt 2026</div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- PAGE: BERANDA -->
+      <section class="dash-page active" id="page-beranda">
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h1 class="welcome-title">Selamat datang, <span id="welcomeName">Siswa</span>! 👋</h1>
+            <p class="welcome-subtitle">Terus semangat belajar Pendidikan Agama Islam hari ini.</p>
+          </div>
+          <div><button class="btn btn-hero-primary" onclick="navTo('materi')" style="background:white; color:var(--blue-700);">Lanjut Belajar →</button></div>
+        </div>
+
+        <div class="stats-grid" id="berandaStats"></div>
+
+        <div class="content-grid-2">
+          <!-- Pengumuman -->
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">📢 Pengumuman Terbaru</h2>
+            </div>
+            <div id="berandaPengumuman"></div>
+          </div>
+          <!-- Materi Terbaru -->
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">📖 Materi Terakhir Ditambahkan</h2>
+              <button class="btn btn-sm btn-outline" onclick="navTo('materi')">Lihat Semua</button>
+            </div>
+            <div id="berandaMateri"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: MATERI -->
+      <section class="dash-page" id="page-materi">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Daftar Materi PAI — Kelas <span id="materiKelasLbl"></span></h2>
+          </div>
+          <div class="materi-list" id="materiList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: UJIAN CBT -->
+      <section class="dash-page" id="page-ujian">
+        <div class="ujian-intro" id="ujianIntro">
+          <h3>Ujian / Penilaian Harian PAI</h3>
+          <p>Kerjakan soal dengan jujur dan teliti. Waktu akan berjalan saat Anda menekan tombol Mulai.</p>
+          <div class="alert alert-warning" style="max-width:400px; margin:0 auto 1.5rem; text-align:left;">
+            <strong>Perhatian:</strong> Jangan refresh halaman saat ujian berlangsung, atau nilai akan hangus.
+          </div>
+          <button class="btn btn-primary btn-lg" id="btnMulaiUjian">Mulai Ujian Sekarang 🚀</button>
+        </div>
+
+        <div class="ujian-area" id="ujianArea">
+          <div class="ujian-header">
+            <div class="ujian-progress" id="ujianProgress">Soal 1 dari 10</div>
+            <div class="ujian-timer" id="ujianTimer">15:00</div>
+          </div>
+          <div class="soal-container">
+            <div class="soal-text" id="soalTeks"></div>
+            <div class="pilihan-list" id="pilihanList"></div>
+          </div>
+          <div class="ujian-nav">
+            <button class="btn btn-outline" id="btnSoalPrev">← Sebelumnya</button>
+            <button class="btn btn-primary" id="btnSoalNext">Selanjutnya →</button>
+            <button class="btn btn-success" id="btnSelesaiUjian" style="display:none;">Selesai & Kumpulkan</button>
+          </div>
+        </div>
+
+        <div class="ujian-hasil" id="ujianHasil">
+          <h2 style="font-size:1.8rem; font-weight:800; color:var(--gray-900); margin-bottom:.5rem;">Ujian Selesai! 🎉</h2>
+          <p style="color:var(--gray-500); margin-bottom:2rem;">Berikut adalah hasil perolehan nilai Anda.</p>
+          <div class="nilai-circle" id="hasilNilai">0</div>
+          <div class="hasil-detail">
+            <div class="hd-item"><span class="hd-val" id="hasilBenar" style="color:var(--success)">0</span><span class="hd-lbl">Benar</span></div>
+            <div class="hd-item"><span class="hd-val" id="hasilSalah" style="color:var(--danger)">0</span><span class="hd-lbl">Salah</span></div>
+          </div>
+          <button class="btn btn-outline" onclick="navTo('beranda')">Kembali ke Beranda</button>
+        </div>
+      </section>
+
+      <!-- PAGE: TUGAS -->
+      <section class="dash-page" id="page-tugas">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Daftar Tugas PAI</h2>
+          </div>
+          <div id="tugasList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: NILAI -->
+      <section class="dash-page" id="page-nilai">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Grafik Perkembangan Nilai</h2>
+          </div>
+          <div class="chart-container" id="nilaiChart"></div>
+        </div>
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Rincian Nilai Semester</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mata Pelajaran</th>
+                  <th>UH 1</th>
+                  <th>UH 2</th>
+                  <th>UTS</th>
+                  <th>UAS</th>
+                  <th>Rata-rata</th>
+                </tr>
+              </thead>
+              <tbody id="nilaiTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: ABSENSI -->
+      <section class="dash-page" id="page-absensi">
+        <div class="content-grid-2">
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Kalender Kehadiran — Okt 2026</h2>
+            </div>
+            <div class="calendar" id="absensiCalendar">
+              <div class="cal-day-name">Min</div><div class="cal-day-name">Sen</div><div class="cal-day-name">Sel</div>
+              <div class="cal-day-name">Rab</div><div class="cal-day-name">Kam</div><div class="cal-day-name">Jum</div><div class="cal-day-name">Sab</div>
+              <!-- Injected by JS -->
+            </div>
+            <div class="cal-legend">
+              <div class="leg-item"><div class="leg-dot" style="background:#10b981;"></div> Hadir</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#f59e0b;"></div> Sakit</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#3b82f6;"></div> Izin</div>
+              <div class="leg-item"><div class="leg-dot" style="background:#ef4444;"></div> Alpha</div>
+            </div>
+          </div>
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Statistik Kehadiran</h2>
+            </div>
+            <div class="stats-grid" style="grid-template-columns:1fr 1fr;" id="absensiStats"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal Materi -->
+<div class="modal-overlay" id="modalMateri">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="mdlTitle">Judul Materi</h3>
+      <button class="modal-close" onclick="closeModal('modalMateri')">✕</button>
+    </div>
+    <div class="modal-body" style="font-size:.9rem; color:var(--gray-600); line-height:1.6;">
+      <p id="mdlDesc" style="margin-bottom:1.5rem;">Deskripsi...</p>
+      <div style="background:var(--blue-50); border:1px solid var(--blue-100); border-radius:var(--r); padding:1rem; display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+        <div style="font-size:2rem;">📄</div>
+        <div style="flex:1;">
+          <div style="font-weight:700; color:var(--gray-900);">Modul Lengkap.pdf</div>
+          <div style="font-size:.8rem;">PDF Document · 2.4 MB</div>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="showToast('Mengunduh file...','success')">Unduh</button>
+      </div>
+      <button class="btn btn-full btn-outline" onclick="closeModal('modalMateri')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/dashboard-siswa.js"></script>
+</body>
+</html>

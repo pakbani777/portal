@@ -6,12 +6,11 @@ import { sounds } from './AudioCues';
 export default function Sidebar() {
   const { activeTab, setActiveTab, activeRole, activeKelas, isMobileMenuOpen, setIsMobileMenuOpen, logout } = useApp();
 
-  const navItems = [
+    const navItems = [
     { id: 'dashboard', label: 'Beranda', desc: 'Ringkasan & KBM', icon: LayoutDashboard },
     { id: 'materi', label: 'Materi Pembelajaran', desc: `PAI Kelas ${activeKelas}`, icon: BookOpen },
-    { id: 'jadwal', label: 'Jadwal Pelajaran', desc: 'Agenda Mingguan', icon: Calendar },
+    { id: 'tugas', label: 'Pengumpulan Tugas', desc: 'Kirim Tugas PAI', icon: ClipboardList },
     { id: 'absensi', label: 'Presensi Bulanan', desc: 'Kelola Kehadiran', icon: UserCheck },
-    { id: 'kuis', label: 'Kuis Interaktif', desc: 'Latihan & Nilai', icon: Award },
     { id: 'ulangan', label: 'Ulangan CBT', desc: 'Ujian UH/PTS/PAS', icon: FileSpreadsheet },
     ...(activeRole === 'guru' ? [{ id: 'admin', label: 'Panel Pak Bani', desc: 'Buku Nilai & Materi', icon: Settings }] : [])
   ];

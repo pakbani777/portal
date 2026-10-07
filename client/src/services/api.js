@@ -182,3 +182,12 @@ export const fetchTugasSubmissions = async (tugasId) => {
   const res = await fetch(`${API_BASE_URL}/api/tugas/${tugasId}/submissions`);
   return res.json();
 };
+
+export async function createUlangan(data) {
+  const res = await fetch(`${BASE_URL}/ulangan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}

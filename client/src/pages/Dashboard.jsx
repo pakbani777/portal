@@ -161,56 +161,24 @@ export default function Dashboard() {
               </div>
             ) : stats?.tugasTerbaru && stats.tugasTerbaru.length > 0 ? (
               stats.tugasTerbaru.map((j) => (
-                <div
-                  key={j.id}
-                  className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-blue-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-700">
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-                          {j.hari}, {j.jam}
-                        </span>
-                        <span className="text-xs font-bold text-blue-800">
-                          Kelas {j.kelas}
-                        </span>
+                  <div
+                    key={j.id}
+                    className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:border-blue-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5" />
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900 mt-1">
-                        {j.materi_pokok}
-                      </h3>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        Pengampu: <strong>{j.guru}</strong> • {j.ruang}
-                      </p>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800">{j.judul}</h4>
+                        <p className="text-xs text-slate-500 font-medium">Batas Waktu: {j.deadline ? new Date(j.deadline).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}</p>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    {j.link_pertemuan && (
-                      <a
-                        href={j.link_pertemuan}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs hover:bg-blue-100 flex items-center gap-1.5"
-                      >
-                        <Video className="w-3.5 h-3.5" />
-                        Ruang Virtual
-                      </a>
-                    )}
-                    <button
-                      onClick={() => setActiveTab('absensi')}
-                      className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-800 font-bold text-xs hover:bg-blue-100 flex items-center gap-1"
-                    >
-                      Cek Presensi
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-6 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
-                Tidak ada tugas yang menunggu.
+                ))
+              ) : (
+                <div className="p-6 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
+                  
               </div>
             )}
           </div>

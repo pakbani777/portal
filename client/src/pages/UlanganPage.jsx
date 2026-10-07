@@ -29,7 +29,7 @@ export default function UlanganPage() {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    fetchUlanganList(activeKelas)
+    fetchUlanganList(activeKelas, currentUser?.nama)
       .then((res) => {
         if (isMounted && res.success) setUlanganList(res.data);
       })

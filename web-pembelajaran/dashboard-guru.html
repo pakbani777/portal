@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Guru — Portal PakBani</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2315803d'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  <!-- Google Fonts: Plus Jakarta Sans & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/dashboard-guru.css" />
+</head>
+<body>
+
+<div class="dashboard active">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width="24" height="24" fill='white'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
+      </div>
+      <div>
+        <div class="sidebar-brand-name">Portal PakBani</div>
+        <div class="sidebar-brand-sub">SMPN 1 Example</div>
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="guruAvatar">G</div>
+      <div>
+        <div class="sidebar-user-name" id="guruNama">Nama Guru</div>
+        <div class="sidebar-user-role">Administrator Guru</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Menu Utama</div>
+      <div class="sidebar-nav-item active" data-page="beranda">
+        <span class="nav-icon">🏠</span> Dashboard
+      </div>
+      <div class="sidebar-nav-item" data-page="siswa">
+        <span class="nav-icon">👨‍🎓</span> Data Siswa
+      </div>
+      <div class="sidebar-nav-item" data-page="materi">
+        <span class="nav-icon">📖</span> Kelola Materi
+      </div>
+      <div class="sidebar-nav-item" data-page="ujian">
+        <span class="nav-icon">✍️</span> Kelola Soal CBT
+      </div>
+      <div class="sidebar-nav-item" data-page="tugas">
+        <span class="nav-icon">📤</span> Kelola Tugas
+      </div>
+      <div class="sidebar-nav-item" data-page="informasi">
+        <span class="nav-icon">📢</span> Pengumuman
+      </div>
+
+      <div class="nav-section-label">Laporan</div>
+      <div class="sidebar-nav-item" data-page="nilai">
+        <span class="nav-icon">📊</span> Rekap Nilai
+      </div>
+      <div class="sidebar-nav-item" data-page="absensi">
+        <span class="nav-icon">📅</span> Data Absensi
+      </div>
+      
+      <div class="nav-section-label">Sistem</div>
+      <div class="sidebar-nav-item" data-page="settings">
+        <span class="nav-icon">⚙️</span> Pengaturan Web
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-outline btn-full btn-sm" id="btnLogout" style="border-color:rgba(255,255,255,.2); color:white;">
+        Keluar
+      </button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="topbar-title" id="topbarTitle">🏠 Dashboard Guru</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-time" id="topbarTime">Senin, 10 Okt 2026</div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      
+      <!-- PAGE: BERANDA -->
+      <section class="dash-page active" id="page-beranda">
+        <div class="guru-welcome">
+          <div style="position:relative; z-index:1;">
+            <h1 class="welcome-title" style="font-size:1.6rem; margin-bottom:.3rem;">Selamat bertugas, <span id="guruWelcomeName">Bapak/Ibu</span>! ✨</h1>
+            <p style="font-size:.9rem; opacity:.85;">Kelola seluruh aktivitas pembelajaran PAI dari satu tempat.</p>
+          </div>
+          <div style="position:relative; z-index:1;">
+            <button class="btn btn-hero-primary" onclick="navTo('informasi')" style="background:white; color:var(--blue-700);">+ Buat Pengumuman</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="guruStats"></div>
+
+        <div class="content-grid-2">
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">👨‍🎓 Siswa Aktif Terbaru</h2>
+              <button class="btn btn-sm btn-outline" onclick="navTo('siswa')">Lihat Semua</button>
+            </div>
+            <div id="siswaPreview"></div>
+          </div>
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">📢 Pengumuman Aktif</h2>
+              <button class="btn btn-sm btn-outline" onclick="navTo('informasi')">Kelola</button>
+            </div>
+            <div id="infoPreview"></div>
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">📊 Statistik Kelas (PAI)</h2>
+          </div>
+          <div class="content-grid-3" id="kelasStats"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: SISWA -->
+      <section class="dash-page" id="page-siswa">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Database Siswa</h2>
+            <div class="widget-header-actions">
+              <select class="filter-select" id="filterKelas" onchange="filterSiswa()">
+                <option value="">Semua Kelas</option>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="showAddSiswaModal()">+ Tambah Siswa</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>NISN</th>
+                  <th>Nama Lengkap</th>
+                  <th>Kelas</th>
+                  <th>Rata-rata Nilai</th>
+                  <th>Kehadiran</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="siswaTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: MATERI -->
+      <section class="dash-page" id="page-materi">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Kelola Materi PAI</h2>
+            <div class="widget-header-actions">
+              <select class="filter-select" id="filterMateriKelas" onchange="renderKelolaMateri()">
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="showToast('Fitur tambah materi segera hadir','warning')">+ Tambah Materi</button>
+            </div>
+          </div>
+          <div id="kelolaMateriList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: UJIAN -->
+      <section class="dash-page" id="page-ujian">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Bank Soal CBT PAI</h2>
+            <div class="widget-header-actions">
+              <select class="filter-select" id="filterSoalKelas" onchange="renderKelolaSoal()">
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="showToast('Fitur tambah soal segera hadir','warning')">+ Tambah Soal</button>
+            </div>
+          </div>
+          <div id="kelolaSoalList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: TUGAS -->
+      <section class="dash-page" id="page-tugas">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Tugas & Penilaian Portofolio</h2>
+            <div class="widget-header-actions">
+              <select class="filter-select" id="filterTugasKelas" onchange="renderKelolaTugas()">
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+              <button class="btn btn-sm btn-primary" onclick="showAddTugasModal()">+ Buat Tugas Baru</button>
+            </div>
+          </div>
+          <div id="kelolaTugasList"></div>
+        </div>
+      </section>
+
+      <!-- PAGE: INFORMASI -->
+      <section class="dash-page" id="page-informasi">
+        <div class="content-grid-2">
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Buat Pengumuman Baru</h2>
+            </div>
+            <form id="formPengumuman" class="form-pengumuman">
+              <div class="form-group">
+                <label>Judul Pengumuman</label>
+                <input type="text" id="pJudul" required placeholder="Contoh: Jadwal Ujian Tengah Semester" />
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Kategori</label>
+                  <select id="pKategori">
+                    <option value="Akademik">Akademik</option>
+                    <option value="Informasi">Informasi</option>
+                    <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Ikon (Emoji)</label>
+                  <input type="text" id="pIcon" value="📢" placeholder="📢" maxlength="2" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Isi Pengumuman</label>
+                <textarea id="pIsi" required placeholder="Ketik isi pengumuman lengkap di sini..."></textarea>
+              </div>
+              <div class="form-group" style="display:flex; align-items:center; gap:.5rem;">
+                <input type="checkbox" id="pPenting" style="width:auto;" />
+                <label for="pPenting" style="margin:0; color:#b91c1c;">Tandai sebagai Penting (Urgent)</label>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Publikasikan Pengumuman</button>
+            </form>
+          </div>
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Daftar Pengumuman Aktif (<span id="infoCount"></span>)</h2>
+            </div>
+            <div id="infoList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: NILAI -->
+      <section class="dash-page" id="page-nilai">
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Rekap Nilai Siswa</h2>
+            <div class="widget-header-actions">
+              <button class="btn btn-sm btn-outline" onclick="showToast('Mengekspor ke Excel...','success')">📥 Export Excel</button>
+              <select class="filter-select" id="filterNilaiKelas" onchange="renderRekapNilai()">
+                <option value="">Semua Kelas</option>
+                <option value="7">Kelas 7</option>
+                <option value="8">Kelas 8</option>
+                <option value="9">Kelas 9</option>
+              </select>
+            </div>
+          </div>
+          <div class="alert alert-info" style="margin-bottom:1.5rem;">
+            Menampilkan peringkat (ranking) berdasarkan Rata-rata Nilai PAI.
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>NISN</th>
+                  <th>Nama Siswa</th>
+                  <th>Kelas</th>
+                  <th>Rata-rata PAI</th>
+                  <th>Predikat</th>
+                  <th>Peringkat</th>
+                </tr>
+              </thead>
+              <tbody id="nilaiTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: ABSENSI -->
+      <section class="dash-page" id="page-absensi">
+        <div class="stats-grid" id="absensiGuruStats" style="margin-bottom:1.5rem;"></div>
+        <div class="widget">
+          <div class="widget-header">
+            <h2 class="widget-title">Rekap Absensi Siswa</h2>
+            <button class="btn btn-sm btn-outline" onclick="showToast('Mengekspor ke PDF...','success')">📥 Export PDF</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama Siswa</th>
+                  <th>Kelas</th>
+                  <th>Hadir</th>
+                  <th>Sakit</th>
+                  <th>Izin</th>
+                  <th>Alpha</th>
+                  <th>% Hadir</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="absensiTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: SETTINGS -->
+      <section class="dash-page" id="page-settings">
+        <div class="content-grid-2">
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Pengaturan Fitur</h2>
+              <button class="btn btn-sm btn-primary" onclick="saveSettings()">Simpan</button>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Akses Ujian CBT</div>
+                <div class="setting-desc">Izinkan siswa untuk mengakses dan mengerjakan ujian CBT.</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Lihat Nilai Secara Langsung</div>
+                <div class="setting-desc">Siswa dapat langsung melihat nilai setelah menyelesaikan ujian.</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Akses Materi Baru</div>
+                <div class="setting-desc">Buka akses bab materi baru secara otomatis sesuai jadwal.</div>
+              </div>
+              <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Maintenance Mode</div>
+                <div class="setting-desc">Nonaktifkan website sementara (Siswa tidak bisa login).</div>
+              </div>
+              <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </div>
+          </div>
+
+          <div class="widget">
+            <div class="widget-header">
+              <h2 class="widget-title">Daftar Admin / Guru</h2>
+              <button class="btn btn-sm btn-outline" onclick="showToast('Fitur admin segera hadir','info')">+ Tambah Guru</button>
+            </div>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Kelas</th>
+                    <th>Subjek</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="guruTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal Tambah Siswa -->
+<div class="modal-overlay" id="modalSiswa">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Tambah Siswa Baru</h3>
+      <button class="modal-close" onclick="closeModal('modalSiswa')">✕</button>
+    </div>
+    <form id="formTambahSiswa">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>NISN</label>
+          <input type="text" id="addNisn" required placeholder="10 Digit NISN" />
+        </div>
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="addNama" required placeholder="Nama Siswa" />
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Tingkat Kelas</label>
+          <select id="addKelas" required>
+            <option value="7">Kelas 7</option>
+            <option value="8">Kelas 8</option>
+            <option value="9">Kelas 9</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Detail Kelas (Misal: 7A)</label>
+          <input type="text" id="addKelasDetail" placeholder="Contoh: 7A" />
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button type="button" class="btn btn-outline btn-full" onclick="closeModal('modalSiswa')">Batal</button>
+        <button type="submit" class="btn btn-primary btn-full">Simpan Siswa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Tambah Tugas -->
+<div class="modal-overlay" id="modalTugas">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Buat Tugas Baru</h3>
+      <button class="modal-close" onclick="closeModal('modalTugas')">✕</button>
+    </div>
+    <form id="formTambahTugas">
+      <div class="form-group">
+        <label>Judul Tugas</label>
+        <input type="text" id="tJudul" required placeholder="Contoh: Portofolio Kaligrafi" />
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Mata Pelajaran</label>
+          <input type="text" id="tMatpel" value="Pendidikan Agama Islam" readonly style="background:var(--gray-50); color:var(--gray-500);" />
+        </div>
+        <div class="form-group">
+          <label>Kelas Tujuan</label>
+          <select id="tKelas" required>
+            <option value="7">Kelas 7</option>
+            <option value="8">Kelas 8</option>
+            <option value="9">Kelas 9</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Batas Waktu (Deadline)</label>
+          <input type="date" id="tDeadline" required />
+        </div>
+        <div class="form-group">
+          <label>Link Pengumpulan (Google Form)</label>
+          <input type="url" id="tLink" placeholder="https://forms.gle/..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Keterangan Tambahan</label>
+        <textarea id="tKet" placeholder="Instruksi tugas..."></textarea>
+      </div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button type="button" class="btn btn-outline btn-full" onclick="closeModal('modalTugas')">Batal</button>
+        <button type="submit" class="btn btn-primary btn-full">Buat Tugas</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/dashboard-guru.js"></script>
+</body>
+</html>

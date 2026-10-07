@@ -227,7 +227,7 @@ app.post('/api/users/bulk', async (req, res) => {
     const { error: siswaErr } = await supabase.from('siswa').insert(siswaData);
     if (siswaErr) throw siswaErr;
 
-    res.json({ success: true, message: Berhasil menginput \ siswa kelas \ });
+    res.json({ success: true, message: `Berhasil menginput ${siswaData.length} siswa kelas ${kelasTarget}` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -732,6 +732,24 @@ app.post('/api/kuis/submit', async (req, res) => {
 // ==========================================
 // 8. ULANGAN ONLINE (CBT)
 // ==========================================
+
+app.post('/api/ulangan', async (req, res) => {
+  try {
+    const { kelas, jenis, judul, durasi_menit, token_ujian, soal_json } = req.body;
+    if (!kelas || !jenis || !judul || !token_ujian || !soal_json) {
+      return res.status(400).json({ success: false, message: 'Harap lengkapi semua field' });
+    }
+    const { data, error } = await supabase.from('ulangan').insert([{
+      kelas, jenis, judul, durasi_menit, token_ujian,
+      soal_json: typeof soal_json === 'string' ? soal_json : JSON.stringify(soal_json)
+    }]).select();
+    if (error) throw error;
+    res.json({ success: true, data: data[0] });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.get('/api/ulangan', async (req, res) => {
   try {
     const { kelas } = req.query;

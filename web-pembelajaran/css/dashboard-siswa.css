@@ -1,0 +1,274 @@
+/* ============================================
+   DASHBOARD SISWA STYLES v2
+   ============================================ */
+
+/* ===== WELCOME BANNER ===== */
+.welcome-banner {
+  background: var(--grad-primary);
+  border-radius: var(--r-lg);
+  padding: 2.25rem 2.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-blue);
+}
+.welcome-banner::before, .welcome-banner::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.05);
+}
+.welcome-banner::before {
+  width: 300px; height: 300px;
+  top: -50%; right: -5%;
+}
+.welcome-banner::after {
+  width: 200px; height: 200px;
+  bottom: -40%; right: 15%;
+}
+.welcome-text { position: relative; z-index: 1; }
+.welcome-title { font-size: 1.85rem; font-weight: 800; margin-bottom: .35rem; letter-spacing: -.02em; }
+.welcome-subtitle { font-size: .95rem; opacity: .85; }
+
+/* ===== DASHBOARD INFO CARDS (PENGUMUMAN) ===== */
+.dash-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.15rem;
+  border-radius: var(--r-md);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-100);
+  margin-bottom: 1rem;
+  transition: all var(--t-md);
+}
+.dash-info-item:hover {
+  background: white;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--blue-200);
+}
+.dash-info-item:last-child { margin-bottom: 0; }
+.dash-info-icon {
+  width: 44px; height: 44px;
+  background: var(--blue-100);
+  border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem; flex-shrink: 0;
+  border: 1px solid var(--blue-200);
+}
+.dash-info-content { flex: 1; }
+.dash-info-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .25rem; }
+.dash-info-title { font-size: .95rem; font-weight: 700; color: var(--gray-900); }
+.dash-info-date { font-size: .75rem; color: var(--gray-400); font-weight: 500; }
+.dash-info-desc { font-size: .84rem; color: var(--gray-500); line-height: 1.6; }
+
+/* ===== LIST MATERI (ACCORDION) ===== */
+.materi-list { display: flex; flex-direction: column; gap: 1rem; }
+.materi-item {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--r-md);
+  background: white;
+  overflow: hidden;
+  transition: all var(--t-md);
+  box-shadow: var(--shadow-xs);
+}
+.materi-item:hover {
+  border-color: var(--blue-300);
+  box-shadow: var(--shadow-md);
+}
+.materi-header {
+  padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 1.1rem;
+  cursor: pointer;
+  background: white;
+}
+.materi-header:hover { background: var(--gray-50); }
+.materi-icon { font-size: 1.6rem; flex-shrink: 0; }
+.materi-info { flex: 1; }
+.materi-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: .15rem; }
+.materi-meta { font-size: .8rem; color: var(--gray-500); display: flex; align-items: center; gap: .75rem; }
+.materi-toggle {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  transition: all var(--t-md);
+}
+.materi-item.open .materi-toggle {
+  background: var(--blue-100);
+  color: var(--primary);
+  transform: rotate(180deg);
+}
+.materi-content {
+  max-height: 0; overflow: hidden;
+  transition: max-height var(--t-lg) ease;
+  background: var(--gray-50);
+}
+.materi-item.open .materi-content {
+  max-height: 600px; border-top: 1px solid var(--gray-100);
+}
+.materi-body { padding: 1.5rem; }
+.subtopik-list { margin-top: 1rem; margin-bottom: 1.25rem; }
+.subtopik-item {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem 0;
+  font-size: .88rem; color: var(--gray-700);
+  border-bottom: 1px dashed var(--gray-200);
+}
+.subtopik-item:last-child { border-bottom: none; }
+.subtopik-icon { color: var(--primary); font-size: 1.1rem; }
+
+/* ===== UJIAN CBT ===== */
+.ujian-intro {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: var(--r-md);
+  padding: 1.75rem; text-align: center; margin-bottom: 1.5rem;
+}
+.ujian-intro h3 { font-size: 1.1rem; font-weight: 800; color: var(--blue-800); margin-bottom: .45rem; }
+.ujian-intro p { font-size: .88rem; color: var(--blue-600); margin-bottom: 1.25rem; }
+
+.ujian-area { display: none; }
+.ujian-area.active { display: block; animation: fadeUp .3s ease; }
+.ujian-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: white; padding: 1.1rem 1.5rem;
+  border-radius: var(--r-md); border: 1px solid var(--gray-200);
+  margin-bottom: 1.25rem; box-shadow: var(--shadow-sm);
+}
+.ujian-progress { font-size: 1.1rem; font-weight: 800; color: var(--gray-900); }
+.ujian-timer {
+  font-size: 1.15rem; font-weight: 800; color: var(--danger);
+  font-family: monospace; letter-spacing: .05em;
+  background: #fee2e2; padding: .25rem .75rem; border-radius: var(--r-sm);
+}
+
+.soal-container {
+  background: white; border-radius: var(--r-lg);
+  padding: 2rem; box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200); margin-bottom: 1.25rem;
+}
+.soal-text { font-size: 1.1rem; font-weight: 600; color: var(--gray-900); line-height: 1.6; margin-bottom: 1.75rem; }
+.pilihan-list { display: flex; flex-direction: column; gap: .75rem; }
+.pilihan-btn {
+  display: flex; align-items: center; gap: 1rem;
+  width: 100%; text-align: left;
+  padding: 1.1rem 1.25rem;
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--r-md);
+  font-size: .95rem; font-weight: 500; color: var(--gray-800);
+  transition: all var(--t); cursor: pointer;
+}
+.pilihan-btn:hover { background: white; border-color: var(--blue-300); }
+.pilihan-label {
+  width: 28px; height: 28px;
+  background: var(--gray-200); color: var(--gray-700);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; flex-shrink: 0;
+}
+.pilihan-btn.selected { background: var(--blue-50); border-color: var(--primary); color: var(--blue-900); }
+.pilihan-btn.selected .pilihan-label { background: var(--primary); color: white; }
+
+/* Feedback states */
+.pilihan-btn.benar { background: #d1fae5; border-color: #10b981; color: #065f46; }
+.pilihan-btn.benar .pilihan-label { background: #10b981; color: white; }
+.pilihan-btn.salah { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+.pilihan-btn.salah .pilihan-label { background: #ef4444; color: white; }
+
+.ujian-nav { display: flex; justify-content: space-between; margin-top: 1.5rem; }
+
+/* Ujian Result */
+.ujian-hasil { text-align: center; padding: 2.5rem 1.5rem; display: none; }
+.ujian-hasil.active { display: block; animation: fadeUp .4s ease; }
+.nilai-circle {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: var(--grad-vivid);
+  color: white; margin: 0 auto 1.5rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3.2rem; font-weight: 900;
+  box-shadow: var(--shadow-lg);
+  border: 6px solid white;
+}
+.hasil-detail { display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; margin-bottom: 2rem; }
+.hd-item { display: flex; flex-direction: column; }
+.hd-val { font-size: 1.4rem; font-weight: 800; color: var(--gray-900); }
+.hd-lbl { font-size: .78rem; color: var(--gray-500); font-weight: 600; text-transform: uppercase; }
+
+/* ===== TUGAS CARDS ===== */
+.tugas-card {
+  background: white; border-radius: var(--r-md);
+  padding: 1.4rem; border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm); margin-bottom: 1.1rem;
+  display: flex; align-items: center; gap: 1.1rem;
+  transition: all var(--t-md);
+}
+.tugas-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--blue-200); }
+.tugas-icon {
+  width: 48px; height: 48px; background: var(--blue-50); border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.tugas-info { flex: 1; }
+.tugas-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: .2rem; }
+.tugas-meta { font-size: .8rem; color: var(--gray-500); display: flex; align-items: center; gap: .75rem; }
+
+/* ===== NILAI CHART (CSS ONLY) ===== */
+.chart-container {
+  height: 240px; display: flex; align-items: flex-end; justify-content: space-around;
+  padding-top: 2rem; border-bottom: 1px solid var(--gray-200);
+  position: relative; margin-bottom: 1.5rem;
+}
+.chart-grid-line {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: dashed 1px var(--gray-200); z-index: 0;
+}
+.bar-group { display: flex; flex-direction: column; align-items: center; gap: .4rem; z-index: 1; width: 45px; }
+.bar {
+  width: 32px; background: var(--grad-vivid);
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  display: flex; justify-content: center; align-items: flex-start;
+  transition: height 1s cubic-bezier(.4,0,.2,1); height: 0;
+  box-shadow: var(--shadow-sm);
+}
+.bar:hover { filter: brightness(1.1); }
+.bar-val { font-size: .7rem; font-weight: 700; color: white; margin-top: .4rem; }
+.bar-lbl { font-size: .75rem; font-weight: 600; color: var(--gray-600); }
+
+/* ===== ABSENSI CALENDAR ===== */
+.calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: .4rem; text-align: center; margin-bottom: 1.5rem;
+}
+.cal-day-name { font-size: .75rem; font-weight: 700; color: var(--gray-500); padding: .5rem 0; text-transform: uppercase; }
+.cal-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm); font-size: .88rem; font-weight: 600;
+  background: var(--gray-50); border: 1px solid var(--gray-100);
+  cursor: pointer; transition: all var(--t);
+}
+.cal-day:not(.empty):hover { border-color: var(--blue-300); transform: scale(1.05); }
+.cal-day.empty { background: transparent; border: none; cursor: default; }
+
+.cal-hadir { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+.cal-sakit { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.cal-izin  { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.cal-alpha { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+
+.cal-legend { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; font-size: .8rem; }
+.leg-item { display: flex; align-items: center; gap: .4rem; }
+.leg-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .welcome-banner { flex-direction: column; text-align: center; gap: 1.25rem; padding: 1.75rem 1.5rem; }
+  .welcome-banner::before { top: auto; bottom: -50%; right: -20%; }
+  .tugas-card { flex-direction: column; text-align: center; align-items: stretch; }
+  .tugas-icon { margin: 0 auto; }
+}

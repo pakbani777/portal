@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider, useApp } from './context/AppContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -93,8 +94,10 @@ case 'ulangan':
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

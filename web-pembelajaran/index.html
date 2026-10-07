@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal PakBani - Pembelajaran PAI SMP/MTs</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2315803d'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>" />
+  <!-- Google Fonts: Plus Jakarta Sans & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="#home" class="nav-brand">
+      <div class="brand-icon-wrap" style="background: none; box-shadow: none;">
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width="32" height="32" fill='var(--primary)'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Portal PakBani</div>
+        <div class="brand-subtitle">Pembelajaran PAI Terpadu</div>
+      </div>
+    </a>
+    <div class="nav-menu" id="navMenu">
+      <a href="#home"   class="nav-link active">Beranda</a>
+      <a href="#profil" class="nav-link">Profil Guru</a>
+      <a href="#info"   class="nav-link">Informasi</a>
+      <a href="#fitur"  class="nav-link">Fitur</a>
+      <a href="#login"  class="nav-link btn-login">Masuk Portal →</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-mesh"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Platform Aktif · Semester Ganjil 2026/2027
+      </div>
+      <h1 class="hero-title">
+        <span class="hero-title-line1">Belajar PAI Lebih</span>
+        <span class="hero-title-line2">Modern &amp; Bermakna</span>
+      </h1>
+      <p class="hero-desc">
+        Portal Pembelajaran Terpadu Pendidikan Agama Islam (PAI) untuk siswa kelas 7, 8, dan 9 SMP/MTs.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-hero-primary" onclick="document.getElementById('login').scrollIntoView({behavior:'smooth'})">
+          🚀 Mulai Belajar Sekarang
+        </button>
+        <button class="btn-hero-outline" onclick="document.getElementById('info').scrollIntoView({behavior:'smooth'})">
+          📢 Lihat Informasi
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="h-stat"><div class="h-stat-num">3</div><div class="h-stat-label">Tingkat Kelas</div></div>
+        <div class="h-stat"><div class="h-stat-num">15+</div><div class="h-stat-label">Bab Materi</div></div>
+        <div class="h-stat"><div class="h-stat-num">30+</div><div class="h-stat-label">Soal CBT</div></div>
+        <div class="h-stat"><div class="h-stat-num">100%</div><div class="h-stat-label">Digital</div></div>
+      </div>
+    </div>
+    <div class="hero-cards">
+      <div class="hero-card">
+        <div class="hero-card-icon">📖</div>
+        <div>
+          <div class="hero-card-label">Materi Tersedia</div>
+          <div class="hero-card-value">15 Bab PAI</div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon">✍️</div>
+        <div>
+          <div class="hero-card-label">Ujian Harian</div>
+          <div class="hero-card-value">CBT Interaktif</div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-icon">📊</div>
+        <div>
+          <div class="hero-card-label">Nilai & Absensi</div>
+          <div class="hero-card-value">Real-time</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFIL GURU -->
+<section class="section" id="profil">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">👨‍🏫 Tim Pengajar</div>
+      <h2 class="section-title">Profil Guru PAI</h2>
+      <p class="section-desc">Guru-guru berpengalaman yang berdedikasi membimbing generasi Islami yang berakhlak mulia</p>
+    </div>
+    <div class="teachers-grid" id="teachersGrid"></div>
+  </div>
+</section>
+
+<!-- INFORMASI TERKINI -->
+<section class="section section-alt" id="info">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">📢 Terbaru</div>
+      <h2 class="section-title">Informasi Terkini</h2>
+      <p class="section-desc">Pengumuman dan berita terbaru seputar kegiatan pembelajaran PAI</p>
+    </div>
+    <div class="info-grid" id="infoGrid"></div>
+  </div>
+</section>
+
+<!-- FITUR -->
+<section class="section" id="fitur">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">⭐ Keunggulan</div>
+      <h2 class="section-title">Fitur Lengkap Portal</h2>
+      <p class="section-desc">Semua yang dibutuhkan untuk pengalaman belajar PAI yang optimal</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon-wrap">📚</div><h3>Materi Lengkap</h3><p>Materi PAI kelas 7, 8, 9 tersusun rapi per bab dengan subtopik detail</p></div>
+      <div class="feature-card"><div class="feature-icon-wrap">💻</div><h3>Ujian CBT Harian</h3><p>Ujian berbasis komputer interaktif dengan timer dan hasil nilai otomatis</p></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📤</div><h3>Kumpul Tugas</h3><p>Pengumpulan tugas mudah langsung via link ke platform terintegrasi</p></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📊</div><h3>Rekap Nilai</h3><p>Lihat UH, UTS, dan UAS dengan grafik perkembangan nilai yang visual</p></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📅</div><h3>Pantau Absensi</h3><p>Kalender kehadiran bulanan dengan persentase dan status kehadiran</p></div>
+      <div class="feature-card"><div class="feature-icon-wrap">📱</div><h3>Responsif</h3><p>Akses nyaman dari smartphone, tablet, maupun laptop</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGIN -->
+<section class="section section-alt" id="login">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">🔐 Akses Platform</div>
+      <h2 class="section-title">Masuk ke Portal PakBani</h2>
+      <p class="section-desc">Masuk dengan akun yang telah diberikan oleh sekolah Anda</p>
+    </div>
+    <div class="login-wrapper">
+      <div class="login-tabs-bar">
+        <button class="tab-btn active" data-tab="siswa">👨‍🎓 Login Siswa</button>
+        <button class="tab-btn" data-tab="guru">👨‍🏫 Login Guru</button>
+      </div>
+      <div class="login-card">
+        <!-- Siswa -->
+        <form class="login-form active" id="formSiswa" novalidate>
+          <div class="form-group">
+            <label for="nisn">NISN (Nomor Induk Siswa Nasional)</label>
+            <input type="text" id="nisn" placeholder="Contoh: 123456" required autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label for="passwordSiswa">Password</label>
+            <div class="input-password">
+              <input type="password" id="passwordSiswa" placeholder="Masukkan password" required autocomplete="current-password" />
+              <button type="button" class="toggle-pw" aria-label="Tampilkan password">👁️</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="kelasSiswa">Kelas</label>
+            <select id="kelasSiswa" required>
+              <option value="">— Pilih Kelas —</option>
+              <option value="7">Kelas 7</option>
+              <option value="8">Kelas 8</option>
+              <option value="9">Kelas 9</option>
+            </select>
+          </div>
+          <p class="demo-hint">🔑 Demo · NISN <strong>123456</strong> · Password <strong>siswa123</strong> · Kelas 7/8/9</p>
+          <button type="submit" class="btn btn-primary btn-full btn-lg">Masuk sebagai Siswa →</button>
+        </form>
+
+        <!-- Guru -->
+        <form class="login-form" id="formGuru" novalidate>
+          <div class="form-group">
+            <label for="nip">NIP / Username Guru</label>
+            <input type="text" id="nip" placeholder="Contoh: guru001" required autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label for="passwordGuru">Password</label>
+            <div class="input-password">
+              <input type="password" id="passwordGuru" placeholder="Masukkan password" required autocomplete="current-password" />
+              <button type="button" class="toggle-pw" aria-label="Tampilkan password">👁️</button>
+            </div>
+          </div>
+          <p class="demo-hint">🔑 Demo · NIP <strong>guru001</strong> · Password <strong>guru123</strong></p>
+          <button type="submit" class="btn btn-primary btn-full btn-lg">Masuk sebagai Guru →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon" style="background: none; box-shadow: none;">
+            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width="32" height="32" fill='white'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>
+          </div>
+          <div>
+            <div class="footer-logo-name">Portal PakBani</div>
+            <div class="footer-logo-sub">SMP/MTs</div>
+          </div>
+        </div>
+        <p>Portal Pembelajaran Terpadu Pendidikan Agama Islam (PAI) untuk siswa-siswi SMP/MTs. Belajar lebih mudah, modern, dan bermakna.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigasi</h4>
+        <a href="#home">🏠 Beranda</a>
+        <a href="#profil">👨‍🏫 Profil Guru</a>
+        <a href="#info">📢 Informasi</a>
+        <a href="#fitur">⭐ Fitur</a>
+        <a href="#login">🔐 Login</a>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak</h4>
+        <p>📍 Portal Pembelajaran PAI</p>
+        <p>✉️ info@pakbani.netlify.app</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Portal PakBani. Semua hak dilindungi.</p>
+      <div class="footer-badges">
+        <span class="footer-badge">Made with ❤️</span>
+        <span class="footer-badge">v2.0</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/landing.js"></script>
+</body>
+</html>
