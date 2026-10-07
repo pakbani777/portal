@@ -4,6 +4,7 @@ import { Users, UserPlus, Key, Save, Loader2, ShieldCheck, GraduationCap } from 
 import { sounds } from './AudioCues';
 
 import { API_BASE_URL } from '../config';
+import { createBulkUsers } from '../services/api';
 
 export default function UserManagement() {
   const { showToast } = useApp();
