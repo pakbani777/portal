@@ -202,8 +202,8 @@ app.post('/api/users/bulk', async (req, res) => {
     }
 
     // 1. Prepare data for 'users' table
-    const usersData = newUsers.map(u => ({
-      username: (u.nisn || (u.nama.replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 10000))).substring(0, 50),
+    const usersData = newUsers.map((u, i) => ({
+      username: (u.nisn || (u.nama.replace(/\s+/g, '').toLowerCase() + Date.now().toString(36) + i)).substring(0, 50),
       password: defaultPassword || 'siswa123',
       role: 'siswa',
       nama: u.nama,
