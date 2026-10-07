@@ -115,7 +115,13 @@ export default function GuruAdminPage() {
     showToast('Buku nilai siswa berhasil diunduh! 📊');
   };
 
-  const [activeAdminTab, setActiveAdminTab] = useState('materi_nilai');
+  const [activeAdminTab, setActiveAdminTab] = useState(() => {
+    return localStorage.getItem('portal_admin_tab') || 'materi_nilai';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('portal_admin_tab', activeAdminTab);
+  }, [activeAdminTab]);
 
   const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
   const [submittingTugas, setSubmittingTugas] = useState(false);

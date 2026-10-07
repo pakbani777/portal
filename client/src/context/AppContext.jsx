@@ -29,8 +29,16 @@ export function AppProvider({ children }) {
 
   // Tab aktif: disesuaikan berdasarkan peran
   const [activeTab, setActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem('portal_active_tab');
+    if (savedTab) return savedTab;
     return activeRole === 'guru' ? 'admin_dashboard' : 'dashboard';
   });
+  
+  useEffect(() => {
+    if (activeTab) {
+      localStorage.setItem('portal_active_tab', activeTab);
+    }
+  }, [activeTab]);
 
   // State navigasi detail
   const [activeMateriDetailId, setActiveMateriDetailId] = useState(null);
@@ -71,6 +79,7 @@ export function AppProvider({ children }) {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('portal_user');
+    localStorage.removeItem('portal_active_tab');
     setActiveTab('dashboard');
     setActiveMateriDetailId(null);
     setActiveKuisId(null);
