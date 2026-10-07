@@ -11,6 +11,7 @@ import AbsensiPage from './pages/AbsensiPage';
 
 import UlanganPage from './pages/UlanganPage';
 import GuruAdminPage from './pages/GuruAdminPage';
+import NilaiPage from './pages/NilaiPage';
 import LoginPage from './pages/LoginPage';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 

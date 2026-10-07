@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut, Award } from 'lucide-react';
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {
@@ -12,6 +12,7 @@ export default function Sidebar() {
     { id: 'tugas', label: 'Pengumpulan Tugas', desc: 'Kirim Tugas PAI', icon: ClipboardList },
     { id: 'absensi', label: 'Presensi Bulanan', desc: 'Kelola Kehadiran', icon: UserCheck },
     { id: 'ulangan', label: 'Ulangan CBT', desc: 'Ujian UH/PTS/PAS', icon: FileSpreadsheet },
+    { id: 'nilai', label: 'Buku Nilai', desc: 'Rekap Nilai Siswa', icon: Award },
     ...(activeRole === 'guru' ? [{ id: 'admin', label: 'Panel Pak Bani', desc: 'Buku Nilai & Materi', icon: Settings }] : [])
   ];
 
