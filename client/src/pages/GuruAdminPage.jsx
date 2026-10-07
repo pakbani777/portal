@@ -92,34 +92,48 @@ export default function GuruAdminPage() {
       return;
     }
 
-    const headers = ['No', 'Tipe Asesmen', 'Nama Siswa', 'Kelas', 'Skor', 'Jawaban Benar', 'Total Soal', 'Waktu Pengumpulan'];
-    const rows = nilaiList.map((n, i) => {
-      let tipeJudul = n.tipe.toUpperCase();
-      if (n.tipe === 'ulangan') {
-        const u = ulanganList.find(ul => ul.id == n.ref_id);
-        if (u) tipeJudul = `CBT: ${u.judul}`;
+    // Bangun Matriks Nilai
+    const uniqueTests = [];
+    nilaiList.forEach(n => {
+      const key = `${n.tipe}_${n.ref_id}`;
+      if (!uniqueTests.find(t => t.key === key)) {
+         let judul = n.tipe;
+         if (n.tipe === 'ulangan') {
+           const u = ulanganList.find(ul => ul.id == n.ref_id);
+           if (u) judul = `CBT: ${u.judul}`;
+         }
+         uniqueTests.push({ key, judul });
       }
-      return [
-      i + 1,
-      `"${tipeJudul}"`,
-      `"${n.nama_siswa}"`,
-      n.kelas,
-      n.skor,
-      n.jawaban_benar,
-      n.total_soal,
-      `"${n.waktu_selesai}"`
-    ];
+    });
+
+    const studentsMap = {};
+    nilaiList.forEach(n => {
+      if (!studentsMap[n.nama_siswa]) {
+        studentsMap[n.nama_siswa] = {};
+      }
+      const key = `${n.tipe}_${n.ref_id}`;
+      studentsMap[n.nama_siswa][key] = n.skor;
+    });
+    const students = Object.keys(studentsMap).sort();
+
+    const headers = ['No', 'Nama Siswa', 'Kelas', ...uniqueTests.map(t => `"${t.judul}"`)];
+    const rows = students.map((nama, i) => {
+      const row = [i + 1, `"${nama}"`, activeKelas];
+      uniqueTests.forEach(t => {
+        const skor = studentsMap[nama][t.key];
+        row.push(skor !== undefined ? skor : '-');
+      });
+      return row;
     });
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Rekap_Nilai_PAI_PakBani_Kelas_${activeKelas}.csv`);
+    link.setAttribute('download', `Buku_Nilai_PAI_PakBani_Kelas_${activeKelas}.csv`);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    showToast('Buku nilai siswa berhasil diunduh! 📊');
+    showToast('Buku nilai siswa berhasil diunduh! 📚');
   };
 
   const [activeAdminTab, setActiveAdminTab] = useState(() => {
@@ -533,79 +547,84 @@ export default function GuruAdminPage() {
               </button>
             </div>
 
-            {/* Tabel Nilai */}
+            {/* Tabel Nilai (Format Matriks) */}
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
-                    <th className="py-2.5 px-3">Nama Siswa</th>
-                    <th className="py-2.5 px-3">Tipe Asesmen</th>
-                    <th className="py-2.5 px-3">Skor</th>
-                    <th className="py-2.5 px-3">Status KKM</th>
-                    <th className="py-2.5 px-3">Waktu Selesai</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400">
-                        Memuat rekap nilai...
-                      </td>
-                    </tr>
-                  ) : nilaiList.length > 0 ? (
-                    nilaiList.map((row) => {
-                      const tuntas = row.skor >= 75;
-                      return (
-                        <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-3 px-3 font-bold text-slate-900">
-                            {row.nama_siswa}
-                            <span className="block text-[10px] text-slate-400 font-normal">
-                              Kelas {row.kelas}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3">
-                            <span
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
-                                row.tipe === 'ulangan'
-                                  ? 'bg-purple-100 text-purple-800'
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}
-                            >
-                              {row.tipe.toUpperCase()}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 font-mono font-extrabold text-slate-900 text-sm">
-                            {row.skor}
-                            <span className="text-[10px] text-slate-400 font-normal">
-                              {' '}({row.jawaban_benar}/{row.total_soal} benar)
-                            </span>
-                          </td>
-                          <td className="py-3 px-3">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                                tuntas
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-rose-100 text-rose-800'
-                              }`}
-                            >
-                              {tuntas ? 'Tuntas' : 'Remedial'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-slate-500 font-medium text-[11px]">
-                            {row.waktu_selesai}
+              {(() => {
+                const uniqueTests = [];
+                nilaiList.forEach(n => {
+                  const key = `${n.tipe}_${n.ref_id}`;
+                  if (!uniqueTests.find(t => t.key === key)) {
+                     let judul = n.tipe;
+                     if (n.tipe === 'ulangan') {
+                       const u = ulanganList.find(ul => ul.id == n.ref_id);
+                       if (u) judul = `${u.judul}`;
+                     }
+                     uniqueTests.push({ key, judul });
+                  }
+                });
+
+                const studentsMap = {};
+                nilaiList.forEach(n => {
+                  if (!studentsMap[n.nama_siswa]) {
+                    studentsMap[n.nama_siswa] = {};
+                  }
+                  const key = `${n.tipe}_${n.ref_id}`;
+                  studentsMap[n.nama_siswa][key] = n.skor;
+                });
+                const students = Object.keys(studentsMap).sort();
+
+                return (
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                        <th className="py-2.5 px-3 min-w-[150px] sticky left-0 bg-white shadow-[1px_0_0_#e2e8f0]">Nama Siswa</th>
+                        {uniqueTests.map((t, idx) => (
+                          <th key={idx} className="py-2.5 px-3 text-center whitespace-nowrap min-w-[100px] border-l border-slate-100">
+                            {t.judul}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={uniqueTests.length + 1} className="py-8 text-center text-slate-400">
+                            Memuat rekap nilai...
                           </td>
                         </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400">
-                        Belum ada riwayat pengerjaan nilai untuk kelas ini.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      ) : students.length > 0 ? (
+                        students.map((nama, i) => (
+                          <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-2.5 px-3 font-bold text-slate-700 sticky left-0 bg-white shadow-[1px_0_0_#e2e8f0] truncate max-w-[150px]">
+                              {nama}
+                            </td>
+                            {uniqueTests.map((t, idx) => {
+                              const skor = studentsMap[nama][t.key];
+                              return (
+                                <td key={idx} className="py-2.5 px-3 text-center font-semibold text-slate-600 border-l border-slate-50">
+                                  {skor !== undefined ? (
+                                    <span className={`px-2 py-1 rounded-md ${skor >= 75 ? 'text-green-700 bg-green-50' : 'text-rose-700 bg-rose-50'}`}>
+                                      {skor}
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-300">-</span>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={10} className="py-8 text-center text-slate-400 italic">
+                            Belum ada rekap nilai untuk kelas ini.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                );
+              })()}
             </div>
 
           </div>
