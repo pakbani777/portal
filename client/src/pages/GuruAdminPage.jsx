@@ -137,7 +137,9 @@ export default function GuruAdminPage() {
   };
 
   const [activeAdminTab, setActiveAdminTab] = useState(() => {
-    return localStorage.getItem('portal_admin_tab') || 'materi_nilai';
+    let tab = localStorage.getItem('portal_admin_tab') || 'nilai';
+    if (tab === 'materi_nilai') tab = 'nilai';
+    return tab;
   });
 
   useEffect(() => {
@@ -329,14 +331,24 @@ export default function GuruAdminPage() {
         {/* Tab Navigasi Admin */}
         <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
           <button
-            onClick={() => { sounds.playClick(); setActiveAdminTab('materi_nilai'); }}
+            onClick={() => { sounds.playClick(); setActiveAdminTab('nilai'); }}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeAdminTab === 'materi_nilai'
+              activeAdminTab === 'nilai'
                 ? 'bg-amber-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Materi & Nilai
+            Buku Nilai
+          </button>
+          <button
+            onClick={() => { sounds.playClick(); setActiveAdminTab('materi'); }}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeAdminTab === 'materi'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Buat Materi
           </button>
           <button
             onClick={() => { sounds.playClick(); setActiveAdminTab('users'); }}
@@ -371,7 +383,7 @@ export default function GuruAdminPage() {
         </div>
       </div>
 
-      {activeAdminTab === 'materi_nilai' && (
+      {activeAdminTab === 'materi' && (
       <div className="space-y-4">
         {/* Filter Kelas */}
         <div className="flex items-center justify-end">
@@ -396,10 +408,7 @@ export default function GuruAdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Kolom Kiri: Form Tambah Materi PAI Baru */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="max-w-3xl mx-auto space-y-4">
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <PlusCircle className="w-5 h-5 text-amber-600" />
@@ -523,9 +532,33 @@ export default function GuruAdminPage() {
             </form>
           </div>
         </div>
+      </div>
+      )}
 
-        {/* Kolom Kanan: Rekap Buku Nilai Siswa */}
-        <div className="lg:col-span-2 space-y-4">
+      {activeAdminTab === 'nilai' && (
+      <div className="space-y-4">
+        <div className="flex items-center justify-end">
+          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+            {['7', '8', '9'].map((kls) => (
+              <button
+                key={kls}
+                onClick={() => {
+                  sounds.playClick();
+                  setActiveKelas(kls);
+                }}
+                className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeKelas === kls
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Kelas {kls}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
@@ -629,8 +662,6 @@ export default function GuruAdminPage() {
 
           </div>
         </div>
-
-      </div>
       </div>
       )}
       {activeAdminTab === 'users' && <UserManagement />}
