@@ -33,7 +33,9 @@ function MainContent() {
       case 'tugas':
         return <TugasPage />;
 case 'ulangan':
-        return <UlanganPage />;
+          return <UlanganPage />;
+        case 'nilai':
+          return <NilaiPage />;
       case 'admin':
         return <GuruAdminPage />;
       default:
