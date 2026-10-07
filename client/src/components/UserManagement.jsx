@@ -4,7 +4,7 @@ import { Users, UserPlus, Key, Save, Loader2, ShieldCheck, GraduationCap } from 
 import { sounds } from './AudioCues';
 
 import { API_BASE_URL } from '../config';
-import { createBulkUsers, deleteUser } from '../services/api';
+import { createBulkUsers, deleteUser, deleteBulkUsers } from '../services/api';
 
 export default function UserManagement() {
   const { showToast } = useApp();
@@ -17,6 +17,46 @@ export default function UserManagement() {
   const [showBulkAddForm, setShowBulkAddForm] = useState(false);
   const [bulkForm, setBulkForm] = useState({ kelas: '7-A', password: 'siswa123', rawData: '' });
   const [bulking, setBulking] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [deletingBulk, setDeletingBulk] = useState(false);
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedUsers(users.map(u => u.id));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleSelectUser = (id) => {
+    if (selectedUsers.includes(id)) {
+      setSelectedUsers(selectedUsers.filter(uId => uId !== id));
+    } else {
+      setSelectedUsers([...selectedUsers, id]);
+    }
+  };
+
+  const handleDeleteBulk = async () => {
+    if (selectedUsers.length === 0) return;
+    if (!window.confirm(`Yakin ingin menghapus ${selectedUsers.length} pengguna terpilih?`)) return;
+    
+    setDeletingBulk(true);
+    try {
+      const res = await deleteBulkUsers(selectedUsers);
+      if (res.success) {
+        showToast(res.message);
+        sounds.playSuccess();
+        setSelectedUsers([]);
+        loadUsers();
+      } else {
+        showToast(res.message);
+      }
+    } catch (e) {
+      showToast('Gagal menghapus pengguna massal');
+    } finally {
+      setDeletingBulk(false);
+    }
+  };
 
   const handleBulkSubmit = async (e) => {
     e.preventDefault();
@@ -334,9 +374,28 @@ export default function UserManagement() {
       {/* Users List */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
+          
+          {selectedUsers.length > 0 && (
+            <div className="bg-red-50 px-4 py-3 border-b border-red-100 flex items-center justify-between">
+              <span className="text-sm font-bold text-red-700">
+                {selectedUsers.length} pengguna dipilih
+              </span>
+              <button
+                onClick={handleDeleteBulk}
+                disabled={deletingBulk}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-2"
+              >
+                {deletingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Hapus Terpilih
+              </button>
+            </div>
+          )}
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs">
+                <th className="py-3 px-4 w-12">
+                  <input type="checkbox" className="rounded text-blue-600 cursor-pointer" onChange={handleSelectAll} checked={users.length > 0 && selectedUsers.length === users.length} />
+                </th>
                 <th className="py-3 px-4">Nama & Role</th>
                 <th className="py-3 px-4">Username / Login</th>
                 <th className="py-3 px-4">Kelas</th>
@@ -346,11 +405,14 @@ export default function UserManagement() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-400">Memuat data pengguna...</td>
+                  <td colSpan={5} className="py-8 text-center text-slate-400">Memuat data pengguna...</td>
                 </tr>
               ) : (
                 users.map(user => (
                   <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3 px-4">
+                      <input type="checkbox" className="rounded text-blue-600 cursor-pointer" checked={selectedUsers.includes(user.id)} onChange={() => handleSelectUser(user.id)} />
+                    </td>
                     <td className="py-3 px-4 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs shrink-0">
                         {user.role === 'guru' ? <ShieldCheck className="w-4 h-4" /> : <GraduationCap className="w-4 h-4" />}

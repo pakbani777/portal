@@ -196,3 +196,12 @@ export const deleteUser = async (id) => {
   const res = await fetch(`${API_BASE_URL}/api/users/${id}`, { method: 'DELETE' });
   return res.json();
 };
+
+export const deleteBulkUsers = async (ids) => {
+  const res = await fetch(`${API_BASE_URL}/api/users/delete-bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids })
+  });
+  return res.json();
+};

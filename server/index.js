@@ -180,6 +180,33 @@ app.post('/api/users/profile', upload.single('foto'), async (req, res) => {
 // 1C. MANAJEMEN PENGGUNA (Oleh Admin/Guru)
 // ==========================================
 
+
+app.post('/api/users/delete-bulk', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: 'Daftar ID pengguna kosong' });
+    }
+
+    // Ambil data users untuk dihapus di tabel siswa juga
+    const { data: users, error: fetchErr } = await supabase.from('users').select('*').in('id', ids);
+    if (fetchErr) throw fetchErr;
+
+    const studentNames = users.filter(u => u.role === 'siswa').map(u => u.nama);
+    
+    if (studentNames.length > 0) {
+      await supabase.from('siswa').delete().in('nama', studentNames);
+    }
+    
+    const { error: delErr } = await supabase.from('users').delete().in('id', ids);
+    if (delErr) throw delErr;
+
+    res.json({ success: true, message: `Berhasil menghapus ${ids.length} pengguna` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.delete('/api/users/:id', async (req, res) => {
   try {
     const { data: user, error: fetchErr } = await supabase.from('users').select('*').eq('id', req.params.id).limit(1);
