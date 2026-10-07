@@ -179,6 +179,26 @@ app.post('/api/users/profile', upload.single('foto'), async (req, res) => {
 // ==========================================
 // 1C. MANAJEMEN PENGGUNA (Oleh Admin/Guru)
 // ==========================================
+
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const { data: user, error: fetchErr } = await supabase.from('users').select('*').eq('id', req.params.id).limit(1);
+    if (fetchErr) throw fetchErr;
+    if (!user || user.length === 0) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+
+    if (user[0].role === 'siswa') {
+      await supabase.from('siswa').delete().eq('nama', user[0].nama);
+    }
+    
+    const { error: delErr } = await supabase.from('users').delete().eq('id', req.params.id);
+    if (delErr) throw delErr;
+
+    res.json({ success: true, message: 'User berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.get('/api/users', async (req, res) => {
   try {
     const { data: items, error } = await supabase

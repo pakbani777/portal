@@ -4,7 +4,7 @@ import { Users, UserPlus, Key, Save, Loader2, ShieldCheck, GraduationCap } from 
 import { sounds } from './AudioCues';
 
 import { API_BASE_URL } from '../config';
-import { createBulkUsers } from '../services/api';
+import { createBulkUsers, deleteUser } from '../services/api';
 
 export default function UserManagement() {
   const { showToast } = useApp();
@@ -108,6 +108,23 @@ export default function UserManagement() {
       showToast('Terjadi kesalahan', 'error');
     } finally {
       setAdding(false);
+    }
+  };
+
+  
+  const handleDeleteUser = async (id, nama) => {
+    if (!window.confirm(`Yakin ingin menghapus ${nama}?`)) return;
+    try {
+      const res = await deleteUser(id);
+      if (res.success) {
+        showToast(`Pengguna ${nama} berhasil dihapus`);
+        sounds.playSuccess();
+        loadUsers();
+      } else {
+        showToast(res.message);
+      }
+    } catch (e) {
+      showToast('Gagal menghapus pengguna');
     }
   };
 

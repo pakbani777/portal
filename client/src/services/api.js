@@ -191,3 +191,8 @@ export async function createUlangan(data) {
   });
   return res.json();
 }
+
+export const deleteUser = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, { method: 'DELETE' });
+  return res.json();
+};
