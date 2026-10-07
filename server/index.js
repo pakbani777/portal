@@ -207,13 +207,13 @@ app.post('/api/users/bulk', async (req, res) => {
       password: defaultPassword || 'siswa123',
       role: 'siswa',
       nama: u.nama,
-      nisn_nip: u.nisn || '',
+      nisn_nip: u.nisn ? u.nisn : null,
       kelas: kelas
     }));
 
     // 2. Prepare data for 'siswa' table
     const siswaData = newUsers.map(u => ({
-      nisn: u.nisn || '',
+      nisn: u.nisn ? u.nisn : null,
       nama: u.nama,
       kelas: kelas,
       gender: 'L'
