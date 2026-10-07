@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai } from '../services/api';
+import { fetchNilai, fetchUlanganList } from '../services/api';
 import { Award, Clock, FileSpreadsheet } from 'lucide-react';
 
 export default function NilaiPage() {
   const { currentUser, activeKelas } = useApp();
   const [nilaiList, setNilaiList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ulanganList, setUlanganList] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,6 +17,14 @@ export default function NilaiPage() {
         .then((res) => {
           if (isMounted && res.success) {
             setNilaiList(res.data);
+          }
+        })
+        .catch((err) => console.error(err));
+
+      fetchUlanganList(activeKelas)
+        .then((res) => {
+          if (isMounted && res.success) {
+            setUlanganList(res.data);
           }
         })
         .catch((err) => console.error(err))
@@ -79,7 +88,12 @@ export default function NilaiPage() {
                           <div className={`p-1.5 rounded-lg \${n.tipe === 'ulangan' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                             {n.tipe === 'ulangan' ? <FileSpreadsheet className="w-3.5 h-3.5" /> : <Award className="w-3.5 h-3.5" />}
                           </div>
-                          <span className="font-bold text-slate-700 capitalize">{n.tipe === 'ulangan' ? 'Ulangan CBT' : n.tipe}</span>
+                          <span className="font-bold text-slate-700 capitalize">
+                              {n.tipe === 'ulangan' ? (() => {
+                                const u = ulanganList.find(ul => ul.id == n.ref_id);
+                                return u ? `CBT: ${u.judul}` : 'Ulangan CBT';
+                              })() : n.tipe}
+                            </span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-center">

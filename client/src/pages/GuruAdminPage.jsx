@@ -93,16 +93,23 @@ export default function GuruAdminPage() {
     }
 
     const headers = ['No', 'Tipe Asesmen', 'Nama Siswa', 'Kelas', 'Skor', 'Jawaban Benar', 'Total Soal', 'Waktu Pengumpulan'];
-    const rows = nilaiList.map((n, i) => [
+    const rows = nilaiList.map((n, i) => {
+      let tipeJudul = n.tipe.toUpperCase();
+      if (n.tipe === 'ulangan') {
+        const u = ulanganList.find(ul => ul.id == n.ref_id);
+        if (u) tipeJudul = `CBT: ${u.judul}`;
+      }
+      return [
       i + 1,
-      n.tipe.toUpperCase(),
+      `"${tipeJudul}"`,
       `"${n.nama_siswa}"`,
       n.kelas,
       n.skor,
       n.jawaban_benar,
       n.total_soal,
       `"${n.waktu_selesai}"`
-    ]);
+    ];
+    });
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
