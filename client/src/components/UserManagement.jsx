@@ -393,7 +393,13 @@ export default function UserManagement() {
                         </div>
                       ) : (
                         <button
-                          onClick={() => { sounds.playClick(); setEditingUserId(user.id); setNewPassword(''); }}
+                            onClick={() => handleDeleteUser(user.id, user.nama)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-lg transition-colors cursor-pointer mr-2"
+                          >
+                            Hapus
+                          </button>
+                          <button
+                            onClick={() => { sounds.playClick(); setEditingUserId(user.id); setNewPassword(''); }}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                         >
                           <Key className="w-3.5 h-3.5 text-blue-600" /> Ubah Sandi
