@@ -576,13 +576,19 @@ export default function UlanganPage() {
                 </div>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-end">
-                <button
-                  onClick={() => handleOpenTokenModal(u)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-800/20 transition-all cursor-pointer"
-                >
-                  <KeyRound className="w-3.5 h-3.5" /> Masukkan Token Ujian
-                </button>
+                            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-end">
+                {u.sudah_dikerjakan ? (
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-50 text-green-700 text-xs font-bold border border-green-200">
+                    Selesai Dikerjakan (Skor: {u.skor_terakhir})
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleOpenTokenModal(u)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-800/20 transition-all cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" /> Masukkan Token Ujian
+                  </button>
+                )}
               </div>
             </div>
           ))}
