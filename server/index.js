@@ -799,150 +799,38 @@ app.post('/api/ulangan', async (req, res) => {
 
 app.get('/api/ulangan', async (req, res) => {
   try {
-    const { kelas } = req.query;
+    const { kelas, nama_siswa } = req.query;
     let query = supabase.from('ulangan').select('id, kelas, jenis, judul, durasi_menit, token_ujian')
       .order('kelas', { ascending: true })
       .order('id', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query = query.eq('kelas', Number(kelas));
+      query = query.eq('kelas', String(kelas));
     }
     
     const { data: items, error } = await query;
     if (error) throw error;
-    res.json({ success: true, data: items });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
 
-app.get('/api/ulangan/:id', async (req, res) => {
-  try {
-    const { data: items, error } = await supabase.from('ulangan').select('*').eq('id', req.params.id).limit(1);
-    if (error) throw error;
-    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
-
-    const item = items[0];
-    item.soal = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
-    delete item.soal_json;
-    res.json({ success: true, data: item });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.post('/api/ulangan/submit', async (req, res) => {
-  try {
-    const { ulangan_id, nama_siswa, kelas, jawaban } = req.body;
-    const { data: items, error: fetchError } = await supabase.from('ulangan').select('*').eq('id', ulangan_id).limit(1);
-    if (fetchError) throw fetchError;
-    if (!items || items.length === 0) return res.status(404).json({ success: false, message: 'Ulangan tidak ditemukan' });
-
-    // Cek apakah siswa sudah mengerjakan sebelumnya
-    const { data: existing, error: existErr } = await supabase.from('nilai')
-      .select('id')
-      .eq('ulangan_id', ulangan_id)
-      .eq('nama_siswa', nama_siswa)
-      .limit(1);
-    if (existErr) throw existErr;
-    if (existing && existing.length > 0) {
-      return res.status(400).json({ success: false, message: 'Anda sudah mengerjakan ujian ini sebelumnya' });
-    }
-
-    const item = items[0];
-    const soalList = typeof item.soal_json === 'string' ? JSON.parse(item.soal_json) : item.soal_json;
-    let jawabanBenar = 0;
-    let totalBobot = 0;
-    let skorDiperoleh = 0;
-    const totalSoal = soalList.length;
-
-    const evaluasi = soalList.map((s) => {
-      const userAns = jawaban[s.id] !== undefined ? jawaban[s.id] : -1;
-      const isCorrect = userAns === s.kunci;
-      const bobot = typeof s.bobot === 'number' ? s.bobot : 1;
+    // Attach student score if nama_siswa is provided
+    let results = items || [];
+    if (nama_siswa) {
+      const { data: nilaiList } = await supabase.from('nilai').select('ref_id, skor').eq('tipe', 'ulangan').eq('nama_siswa', nama_siswa);
       
-      totalBobot += bobot;
-      
-      if (isCorrect) {
-        jawabanBenar++;
-        skorDiperoleh += bobot;
+      const nilaiMap = {};
+      if (nilaiList) {
+        nilaiList.forEach(n => {
+          nilaiMap[n.ref_id] = n.skor;
+        });
       }
-      return {
-        id: s.id,
-        pertanyaan: s.pertanyaan,
-        pilihan: s.pilihan,
-        jawabanUser: userAns,
-        kunciJawaban: s.kunci,
-        benar: isCorrect,
-        bobot: bobot
-      };
-    });
 
-    const skor = totalBobot > 0 ? Math.round((skorDiperoleh / totalBobot) * 100) : 0;
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 16);
-
-    const { error: insertError } = await supabase.from('nilai').insert([{
-      tipe: 'ulangan',
-      ref_id: ulangan_id,
-      nama_siswa: nama_siswa || 'Siswa PAI',
-      kelas: String(kelas || item.kelas),
-      skor,
-      total_soal: totalSoal,
-      jawaban_benar: jawabanBenar,
-      waktu_selesai: now
-    }]);
-
-    if (insertError) throw insertError;
-
-    res.json({
-      success: true,
-      data: {
-        skor,
-        totalSoal,
-        jawabanBenar,
-        evaluasi,
-        waktuSelesai: now,
-        judul: item.judul
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ==========================================
-// 9. NILAI & REKAP
-// ==========================================
-app.get('/api/nilai', async (req, res) => {
-  try {
-    const { nama, kelas } = req.query;
-    let query = supabase.from('nilai').select('*').order('id', { ascending: false });
-
-    if (nama) {
-      query = query.eq('nama_siswa', nama);
-    }
-    if (kelas && kelas !== 'all') {
-      query = query.eq('kelas', String(kelas));
+      results = results.map(u => ({
+        ...u,
+        sudah_dikerjakan: nilaiMap[u.id] !== undefined,
+        skor_terakhir: nilaiMap[u.id] !== undefined ? nilaiMap[u.id] : null
+      }));
     }
 
-    const { data: items, error } = await query;
-    if (error) throw error;
-    res.json({ success: true, data: items });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ==========================================
-// 10. PENGUMUMAN
-app.post('/api/pengumuman', async (req, res) => {
-  try {
-    const { judul, isi, tipe } = req.body;
-    const { data: inserted, error } = await supabase.from('pengumuman').insert([{
-      judul, isi, tipe: tipe || 'info', tanggal: new Date().toISOString()
-    }]).select();
-    if (error) throw error;
-    res.json({ success: true, data: inserted[0] });
+    res.json({ success: true, data: results });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
