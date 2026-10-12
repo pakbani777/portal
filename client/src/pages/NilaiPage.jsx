@@ -92,7 +92,7 @@ export default function NilaiPage() {
                               {n.tipe === 'ulangan' ? (() => {
                                 const u = ulanganList.find(ul => ul.id == n.ref_id);
                                 return u ? `CBT: ${u.judul}` : 'Ulangan CBT';
-                              })() : n.tipe}
+                              })() : n.tipe === 'kuis' ? `Kuis Bab ${n.ref_id || 'Interaktif'}` : n.tipe}
                             </span>
                         </div>
                       </td>

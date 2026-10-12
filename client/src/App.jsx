@@ -16,7 +16,7 @@ import LoginPage from './pages/LoginPage';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 function MainContent() {
-  const { activeTab, toast, isAuthenticated, isMobileMenuOpen, setIsMobileMenuOpen } = useApp();
+  const { activeTab, toast, isAuthenticated, isMobileMenuOpen, setIsMobileMenuOpen, activeRole } = useApp();
 
   if (!isAuthenticated) {
     return <LoginPage />;
@@ -35,7 +35,7 @@ function MainContent() {
 case 'ulangan':
           return <UlanganPage />;
         case 'nilai':
-          return <NilaiPage />;
+          return activeRole === 'guru' ? <GuruAdminPage /> : <NilaiPage />;
       case 'admin':
         return <GuruAdminPage />;
       default:

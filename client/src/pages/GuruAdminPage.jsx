@@ -101,6 +101,8 @@ export default function GuruAdminPage() {
          if (n.tipe === 'ulangan') {
            const u = ulanganList.find(ul => ul.id == n.ref_id);
            if (u) judul = `CBT: ${u.judul}`;
+         } else if (n.tipe === 'kuis') {
+           judul = `Kuis Bab ${n.ref_id || 'Interaktif'}`;
          }
          uniqueTests.push({ key, judul });
       }
@@ -126,7 +128,7 @@ export default function GuruAdminPage() {
       return row;
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -591,6 +593,8 @@ export default function GuruAdminPage() {
                      if (n.tipe === 'ulangan') {
                        const u = ulanganList.find(ul => ul.id == n.ref_id);
                        if (u) judul = `${u.judul}`;
+                     } else if (n.tipe === 'kuis') {
+                       judul = `Kuis Bab ${n.ref_id || 'Interaktif'}`;
                      }
                      uniqueTests.push({ key, judul });
                   }

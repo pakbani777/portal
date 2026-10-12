@@ -37,7 +37,9 @@ export default function Sidebar() {
               key={item.id}
               onClick={() => {
                 sounds.playClick();
-                setActiveTab(item.id); setIsMobileMenuOpen(false);
+                if (item.id === 'nilai' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'nilai'); }
+                setActiveTab(item.id);
+                setIsMobileMenuOpen(false);
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all ${
                 isActive
