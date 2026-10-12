@@ -93,7 +93,7 @@ app.post('/api/auth/login', async (req, res) => {
         id: 1,
         username: 'pakbani',
         role: 'guru',
-        nama: 'Pak Bani, S.Pd.I',
+        nama: "Ma'ruf Robbani, S.Pd.I., Gr.",
         nisn_nip: '19870815 201201 1 009',
         kelas: 'Semua Kelas (7, 8, 9)'
       };

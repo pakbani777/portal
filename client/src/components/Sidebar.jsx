@@ -89,7 +89,7 @@ export default function Sidebar() {
         <p className="text-[11px] text-slate-600 italic leading-relaxed">
           "Barang siapa menempuh jalan untuk mencari ilmu, Allah akan mudahkan jalannya menuju surga."
         </p>
-        <p className="text-[10px] font-semibold text-blue-700 mt-1">HR. Muslim • Pengampu: Pak Bani</p>
+        <p className="text-[10px] font-semibold text-blue-700 mt-1">HR. Muslim • Pengampu: Ma'ruf Robbani, S.Pd.I., Gr.</p>
       </div>
 
     </aside>

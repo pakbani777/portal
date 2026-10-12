@@ -362,7 +362,7 @@ export default function AbsensiPage() {
                 Informasi Presensi Siswa: Dikelola Resmi oleh Bapak Guru (Pak Bani)
               </h3>
               <p className="text-xs text-blue-800 mt-0.5 leading-relaxed">
-                Pencatatan dan verifikasi kehadiran KBM PAI diisi langsung oleh <strong>Pak Bani, S.Pd.I</strong> pada setiap sesi jam pelajaran. Siswa dapat memantau riwayat dan akumulasi persentase kehadiran bulanan pada tabel di bawah ini.
+                Pencatatan dan verifikasi kehadiran KBM PAI diisi langsung oleh <strong>Ma'ruf Robbani, S.Pd.I., Gr.</strong> pada setiap sesi jam pelajaran. Siswa dapat memantau riwayat dan akumulasi persentase kehadiran bulanan pada tabel di bawah ini.
               </p>
             </div>
           </div>
@@ -424,7 +424,7 @@ export default function AbsensiPage() {
                 Input & Perbarui Presensi Kelas {kelasLabel}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Pengampu: <strong>Pak Bani, S.Pd.I</strong> • Pilih tanggal KBM dan tentukan status kehadiran siswa.
+                Pengampu: <strong>Ma'ruf Robbani, S.Pd.I., Gr.</strong> • Pilih tanggal KBM dan tentukan status kehadiran siswa.
               </p>
             </div>
 

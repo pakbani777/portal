@@ -118,7 +118,7 @@ if (checkUsers.count === 0) {
     'pakbani',
     'pakbani123',
     'guru',
-    'Pak Bani, S.Pd.I',
+    "Ma'ruf Robbani, S.Pd.I., Gr.",
     '19870815 201201 1 009',
     'Guru Pengampu PAI'
   );
@@ -217,10 +217,10 @@ if (checkSiswa.count === 0) {
   siswa9A.forEach(s => insertSiswa.run(s.nisn, s.nama, '9-A', s.gender));
 }
 
-// 3. Update Nama Guru di Jadwal & Pengumuman ke "Pak Bani, S.Pd.I"
+// 3. Update Nama Guru di Jadwal & Pengumuman ke "Ma'ruf Robbani, S.Pd.I., Gr."
 db.exec(`
-  UPDATE jadwal SET guru = 'Pak Bani, S.Pd.I';
-  UPDATE pengumuman SET penulis = 'Pak Bani, S.Pd.I';
+  UPDATE jadwal SET guru = 'Ma'ruf Robbani, S.Pd.I., Gr.';
+  UPDATE pengumuman SET penulis = 'Ma'ruf Robbani, S.Pd.I., Gr.';
 `);
 
 module.exports = db;

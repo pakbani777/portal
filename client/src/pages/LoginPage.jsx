@@ -202,7 +202,7 @@ export default function LoginPage() {
               className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 transition-all cursor-pointer"
             >
               <span className="text-[10px] font-bold uppercase block text-amber-700">Admin</span>
-              <span className="text-xs font-extrabold block">Pak Bani, S.Pd.I</span>
+              <span className="text-xs font-extrabold block">Ma'ruf Robbani, S.Pd.I., Gr.</span>
             </button>
 
             <button
