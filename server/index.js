@@ -408,7 +408,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
       supabase.from('ulangan').select('*', { count: 'exact', head: true }).eq('kelas', kelas),
       supabase.from('absensi').select('status').eq('nama_siswa', namaSiswa),
       supabase.from('nilai').select('skor').eq('nama_siswa', namaSiswa),
-      supabase.from('pengumuman').select('*').order('id', { ascending: false }).limit(3),
+      supabase.from('pengumuman').select('*').not('judul', 'like', 'SETTING_%').order('id', { ascending: false }).limit(5),
       supabase.from('jadwal').select('*').like('kelas', `${kelas}%`).order('id', { ascending: true }).limit(2),
       supabase.from('siswa').select('*', { count: 'exact', head: true }),
       supabase.from('nilai').select('*', { count: 'exact', head: true })
@@ -441,7 +441,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
         totalAbsen,
         rataRataNilai: Math.round(avgScore),
         jadwalHariIni: jadwalHariIni || [],
-        pengumuman: pengumuman || [],
+        pengumuman: (pengumuman || []).map(parsePengumuman),
         totalSiswaSemua: totalSiswaSemua || 0,
         totalNilaiUjian: totalNilaiUjian || 0
       }
@@ -955,14 +955,25 @@ app.get('/api/nilai', async (req, res) => {
 
 // ==========================================
 // 10. PENGUMUMAN
+function parsePengumuman(item) {
+  if (!item) return item;
+  let tipe = 'info';
+  const rawJudul = item.judul || '';
+  if (rawJudul.startsWith('[PENTING]')) tipe = 'urgent';
+  else if (rawJudul.startsWith('[AGENDA]')) tipe = 'agenda';
+  else if (rawJudul.startsWith('[TUGAS]')) tipe = 'tugas';
+  return { ...item, tipe: item.tipe || tipe };
+}
 app.post('/api/pengumuman', async (req, res) => {
   try {
-    const { judul, isi, tipe } = req.body;
+    const { judul, isi, tipe, penulis } = req.body;
+    if (!judul || !isi) return res.status(400).json({ success: false, message: 'Judul dan isi pengumuman wajib diisi' });
+    const tgl = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     const { data: inserted, error } = await supabase.from('pengumuman').insert([{
-      judul, isi, tipe: tipe || 'info', tanggal: new Date().toISOString()
+      judul: ((tipe === 'urgent' && !judul.trim().startsWith('[PENTING]')) ? `[PENTING] ${judul.trim()}` : (tipe === 'agenda' && !judul.trim().startsWith('[AGENDA]')) ? `[AGENDA] ${judul.trim()}` : (tipe === 'tugas' && !judul.trim().startsWith('[TUGAS]')) ? `[TUGAS] ${judul.trim()}` : judul.trim()), isi: isi.trim(), tanggal: tgl, penulis: penulis || "Ma'ruf Robbani, S.Pd.I., Gr."
     }]).select();
     if (error) throw error;
-    res.json({ success: true, data: inserted[0] });
+    res.json({ success: true, message: 'Pengumuman berhasil diterbitkan!', data: parsePengumuman(inserted[0]) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -972,7 +983,18 @@ app.get('/api/pengumuman', async (req, res) => {
   try {
     const { data: items, error } = await supabase.from('pengumuman').select('*').not('judul', 'like', 'SETTING_%').order('id', { ascending: false });
     if (error) throw error;
-    res.json({ success: true, data: items });
+    res.json({ success: true, data: (items || []).map(parsePengumuman) });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.delete('/api/pengumuman/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabase.from('pengumuman').delete().eq('id', id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Pengumuman berhasil dihapus!' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

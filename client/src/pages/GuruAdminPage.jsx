@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai, createMateri, createPengumuman, createTugas, createUlangan, fetchUlanganList, fetchTugas, deleteTugas, fetchSettings, saveSettings } from '../services/api';
-import { Settings, PlusCircle, Download, Send, ShieldCheck, Trash2, ExternalLink, Link as LinkIcon } from 'lucide-react';
+import { fetchNilai, createMateri, createPengumuman, fetchPengumuman, deletePengumuman, createTugas, createUlangan, fetchUlanganList, fetchTugas, deleteTugas, fetchSettings, saveSettings } from '../services/api';
+import { Settings, PlusCircle, Download, Send, ShieldCheck, Trash2, ExternalLink, Link as LinkIcon, Bell, Megaphone } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -9,7 +9,7 @@ import UserManagement from '../components/UserManagement';
 import ModalKelolaKelas from '../components/ModalKelolaKelas';
 
 export default function GuruAdminPage({ defaultTab }) {
-  const { activeKelas, setActiveKelas, daftarKelas = [], showToast } = useApp();
+  const { activeKelas, setActiveKelas, daftarKelas = [], currentUser, showToast } = useApp();
   const [showModalKelas, setShowModalKelas] = useState(false);
   const [nilaiList, setNilaiList] = useState([]);
   const [ulanganList, setUlanganList] = useState([]);
@@ -33,6 +33,18 @@ export default function GuruAdminPage({ defaultTab }) {
   const [loadingTugas, setLoadingTugas] = useState(false);
   const [settingLink, setSettingLink] = useState('');
   const [savingSetting, setSavingSetting] = useState(false);
+  const [pengumumanList, setPengumumanList] = useState([]);
+  const [loadingPengumuman, setLoadingPengumuman] = useState(false);
+
+  const loadPengumumanList = () => {
+    setLoadingPengumuman(true);
+    fetchPengumuman()
+      .then((res) => {
+        if (res.success) setPengumumanList(res.data || []);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoadingPengumuman(false));
+  };
 
   const loadSettings = () => {
     fetchSettings()
@@ -94,6 +106,7 @@ export default function GuruAdminPage({ defaultTab }) {
     loadNilai();
     loadTugasList();
     loadSettings();
+    loadPengumumanList();
   }, [activeKelas]);
 
   const handleCreateMateriSubmit = async (e) => {
@@ -383,12 +396,15 @@ export default function GuruAdminPage({ defaultTab }) {
 
   const handlePengumumanSubmit = async (e) => {
     e.preventDefault();
-    if (!formPengumuman.judul || !formPengumuman.isi) return showToast('Judul dan Isi harus diisi');
+    sounds.playClick();
+    if (!formPengumuman.judul?.trim() || !formPengumuman.isi?.trim()) return showToast('Judul dan Isi pengumuman wajib diisi', 'error');
     setSubmittingPengumuman(true);
     try {
-      const res = await createPengumuman(formPengumuman);
+      const res = await createPengumuman({ ...formPengumuman, penulis: currentUser?.nama || "Ma'ruf Robbani, S.Pd.I., Gr." });
       if (res.success) {
-        showToast('Pengumuman berhasil diterbitkan!');
+        sounds.playSuccess();
+        showToast('Pengumuman berhasil diterbitkan dan langsung tampil di Beranda murid!');
+        loadPengumumanList();
         setFormPengumuman({ judul: '', isi: '', tipe: 'info' });
       } else {
         showToast(res.message);
@@ -397,6 +413,25 @@ export default function GuruAdminPage({ defaultTab }) {
       showToast('Gagal menerbitkan pengumuman');
     }
     setSubmittingPengumuman(false);
+  };
+
+  const handleDeletePengumuman = async (id, judul) => {
+    if (!window.confirm(`Yakin ingin menghapus pengumuman "${judul}"?`)) return;
+    sounds.playClick();
+    try {
+      const res = await deletePengumuman(id);
+      if (res.success) {
+        sounds.playSuccess();
+        showToast('Pengumuman berhasil dihapus');
+        loadPengumumanList();
+      } else {
+        sounds.playError();
+        showToast(res.message || 'Gagal menghapus pengumuman', 'error');
+      }
+    } catch (err) {
+      sounds.playError();
+      showToast('Gagal menghapus pengumuman', 'error');
+    }
   };
 
 
@@ -416,7 +451,7 @@ export default function GuruAdminPage({ defaultTab }) {
         </div>
 
         {/* Tab Navigasi Admin */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto gap-1">
           <button
             onClick={() => { sounds.playClick(); setActiveAdminTab('nilai'); }}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -476,6 +511,16 @@ export default function GuruAdminPage({ defaultTab }) {
               }`}
             >
               Setting Login
+            </button>
+            <button
+              onClick={() => { sounds.playClick(); setActiveAdminTab('pengumuman'); }}
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeAdminTab === 'pengumuman'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Pengumuman
             </button>
         </div>
       </div>
@@ -1196,6 +1241,162 @@ Bobot: 2
               <p className="leading-relaxed">
                 Di halaman login, menu "Akses Cepat Pengujian" telah dinonaktifkan. Sebagai gantinya, siswa yang lupa username atau password dapat mengeklik tombol bantuan yang akan langsung membuka tautan daftar akun yang Bapak tentukan di atas.
               </p>
+            </div>
+          </div>
+        )}
+
+        {activeAdminTab === 'pengumuman' && (
+          <div className="space-y-6 animate-in fade-in">
+            {/* Form Terbitkan Pengumuman */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+              <div className="border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-amber-600" />
+                  📢 Pengaturan Pengumuman Guru (Ma'ruf Robbani, S.Pd.I., Gr.)
+                </h2>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Tambah pengumuman penting untuk siswa atau hapus pengumuman yang sudah selesai/kedaluwarsa. Pengumuman di bawah ini akan langsung tampil di widget pengumuman halaman Beranda para siswa.
+                </p>
+              </div>
+
+              <form onSubmit={handlePengumumanSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Judul Pengumuman <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formPengumuman.judul}
+                      onChange={(e) => setFormPengumuman({ ...formPengumuman, judul: e.target.value })}
+                      placeholder="Contoh: Jadwal Penilaian Tengah Semester (PTS) Ganjil PAI"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Kategori / Label Pengumuman
+                    </label>
+                    <select
+                      value={formPengumuman.tipe}
+                      onChange={(e) => setFormPengumuman({ ...formPengumuman, tipe: e.target.value })}
+                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                    >
+                      <option value="info">Pemberitahuan Umum</option>
+                      <option value="urgent">Penting & Mendesak</option>
+                      <option value="agenda">Agenda KBM & Ulangan</option>
+                      <option value="tugas">Informasi Tugas</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Isi Pengumuman <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows="4"
+                    value={formPengumuman.isi}
+                    onChange={(e) => setFormPengumuman({ ...formPengumuman, isi: e.target.value })}
+                    placeholder="Tuliskan detail pengumuman yang ingin disampaikan kepada seluruh siswa..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm leading-relaxed focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={submittingPengumuman}
+                    className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md shadow-amber-600/20 transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    {submittingPengumuman ? 'Menerbitkan...' : 'Terbitkan Pengumuman'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Daftar Pengumuman Aktif */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-amber-600" />
+                  <h3 className="text-base font-bold text-slate-900">
+                    Daftar Pengumuman Aktif
+                  </h3>
+                </div>
+                <span className="px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full">
+                  {pengumumanList.length} Pengumuman
+                </span>
+              </div>
+
+              {loadingPengumuman ? (
+                <div className="py-8 text-center text-slate-400 text-xs">Memuat pengumuman...</div>
+              ) : pengumumanList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pengumumanList.map((p) => {
+                    const badgeColor = 
+                      p.tipe === 'urgent' ? 'bg-red-100 text-red-700' :
+                      p.tipe === 'agenda' ? 'bg-purple-100 text-purple-700' :
+                      p.tipe === 'tugas' ? 'bg-blue-100 text-blue-700' :
+                      'bg-amber-100 text-amber-800';
+
+                    const badgeLabel = 
+                      p.tipe === 'urgent' ? 'Penting' :
+                      p.tipe === 'agenda' ? 'Agenda KBM' :
+                      p.tipe === 'tugas' ? 'Tugas' :
+                      'Pemberitahuan';
+
+                    return (
+                      <div
+                        key={p.id}
+                        className="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between hover:shadow-xs transition"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase ${badgeColor}`}>
+                              {badgeLabel}
+                            </span>
+                            <span className="text-[11px] text-slate-400 font-medium">
+                              {p.tanggal}
+                            </span>
+                          </div>
+
+                          <h4 className="font-bold text-slate-900 text-sm mb-1.5 leading-snug">
+                            {p.judul}
+                          </h4>
+                          <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                            {p.isi}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                          <span className="text-[10px] text-slate-400">
+                            Penulis: <strong className="text-slate-600">{p.penulis || "Ma'ruf Robbani, S.Pd.I., Gr."}</strong>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePengumuman(p.id, p.judul)}
+                            className="flex items-center gap-1 px-2.5 py-1 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold transition cursor-pointer"
+                            title="Hapus Pengumuman Ini"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Hapus</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-slate-400 text-xs italic space-y-2">
+                  <Megaphone className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p>Belum ada pengumuman yang diterbitkan. Silakan isi form di atas untuk membuat pengumuman pertama.</p>
+                </div>
+              )}
             </div>
           </div>
         )}

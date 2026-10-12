@@ -226,7 +226,17 @@ export default function Dashboard() {
                 className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs hover:shadow-sm transition-all"
               >
                 <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
-                  <span className="font-semibold text-amber-600">Pemberitahuan</span>
+                  <span className={`font-bold ${
+                    p.tipe === 'urgent' ? 'text-rose-600' :
+                    p.tipe === 'agenda' ? 'text-purple-600' :
+                    p.tipe === 'tugas' ? 'text-blue-600' :
+                    'text-amber-600'
+                  }`}>
+                    {p.tipe === 'urgent' ? 'PENTING' :
+                     p.tipe === 'agenda' ? 'AGENDA KBM' :
+                     p.tipe === 'tugas' ? 'TUGAS' :
+                     'Pemberitahuan'}
+                  </span>
                   <span>{p.tanggal}</span>
                 </div>
                 <h4 className="text-xs font-bold text-slate-900 leading-snug">

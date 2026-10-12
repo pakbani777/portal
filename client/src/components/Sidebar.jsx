@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut, Award, KeyRound } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut, Award, KeyRound, Bell } from 'lucide-react';
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {
@@ -15,6 +15,7 @@ export default function Sidebar() {
     { id: 'nilai', label: 'Buku Nilai', desc: 'Rekap Nilai Siswa', icon: Award },
     ...(activeRole === 'guru' ? [
       { id: 'admin', label: 'Panel Guru', desc: 'Buku Nilai & Materi', icon: Settings },
+      { id: 'pengumuman', label: 'Pengumuman Guru', desc: 'Kelola Pengumuman', icon: Bell },
       { id: 'setting', label: 'Setting Login', desc: 'Link Akun & Password', icon: KeyRound }
     ] : [])
   ];
@@ -42,6 +43,7 @@ export default function Sidebar() {
                 sounds.playClick();
                 if (item.id === 'nilai' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'nilai'); }
                 if (item.id === 'setting' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'setting'); }
+                if (item.id === 'pengumuman' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'pengumuman'); }
                 setActiveTab(item.id);
                 setIsMobileMenuOpen(false);
               }}

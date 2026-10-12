@@ -136,6 +136,13 @@ export const createPengumuman = async (data) => {
   return res.json();
 };
 
+export const deletePengumuman = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/api/pengumuman/${id}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};
+
 export const createUser = async (data) => {
   const res = await fetch(`${API_BASE_URL}/api/users`, {
     method: 'POST',

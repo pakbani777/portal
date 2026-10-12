@@ -40,6 +40,8 @@ case 'ulangan':
         return <GuruAdminPage />;
       case 'setting':
         return <GuruAdminPage defaultTab="setting" />;
+      case 'pengumuman':
+        return <GuruAdminPage defaultTab="pengumuman" />;
       default:
         return <Dashboard />;
     }
