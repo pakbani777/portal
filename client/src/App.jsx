@@ -38,6 +38,8 @@ case 'ulangan':
           return activeRole === 'guru' ? <GuruAdminPage /> : <NilaiPage />;
       case 'admin':
         return <GuruAdminPage />;
+      case 'setting':
+        return <GuruAdminPage defaultTab="setting" />;
       default:
         return <Dashboard />;
     }

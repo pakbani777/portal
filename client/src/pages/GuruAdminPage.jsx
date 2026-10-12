@@ -7,7 +7,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import UserManagement from '../components/UserManagement';
 
-export default function GuruAdminPage() {
+export default function GuruAdminPage({ defaultTab }) {
   const { activeKelas, setActiveKelas, showToast } = useApp();
   const [nilaiList, setNilaiList] = useState([]);
   const [ulanganList, setUlanganList] = useState([]);
@@ -186,6 +186,7 @@ export default function GuruAdminPage() {
   };
 
   const [activeAdminTab, setActiveAdminTab] = useState(() => {
+    if (defaultTab) return defaultTab;
     let tab = localStorage.getItem('portal_admin_tab') || 'nilai';
     if (tab === 'materi_nilai') tab = 'nilai';
     return tab;
@@ -194,6 +195,12 @@ export default function GuruAdminPage() {
   useEffect(() => {
     localStorage.setItem('portal_admin_tab', activeAdminTab);
   }, [activeAdminTab]);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveAdminTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
   const [submittingTugas, setSubmittingTugas] = useState(false);
@@ -457,6 +464,16 @@ export default function GuruAdminPage() {
               }`}
             >
               Buat CBT
+            </button>
+            <button
+              onClick={() => { sounds.playClick(); setActiveAdminTab('setting'); }}
+              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeAdminTab === 'setting'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Setting Login
             </button>
         </div>
       </div>

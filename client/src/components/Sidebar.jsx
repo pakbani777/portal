@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut, Award } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ClipboardList, UserCheck, FileSpreadsheet, Settings, Sparkles, LogOut, Award, KeyRound } from 'lucide-react';
 import { sounds } from './AudioCues';
 
 export default function Sidebar() {
@@ -13,7 +13,10 @@ export default function Sidebar() {
     { id: 'absensi', label: 'Presensi Bulanan', desc: 'Kelola Kehadiran', icon: UserCheck },
     { id: 'ulangan', label: 'Ulangan CBT', desc: 'Ujian UH/PTS/PAS', icon: FileSpreadsheet },
     { id: 'nilai', label: 'Buku Nilai', desc: 'Rekap Nilai Siswa', icon: Award },
-    ...(activeRole === 'guru' ? [{ id: 'admin', label: 'Panel Pak Bani', desc: 'Buku Nilai & Materi', icon: Settings }] : [])
+    ...(activeRole === 'guru' ? [
+      { id: 'admin', label: 'Panel Guru', desc: 'Buku Nilai & Materi', icon: Settings },
+      { id: 'setting', label: 'Setting Login', desc: 'Link Akun & Password', icon: KeyRound }
+    ] : [])
   ];
 
   return (
@@ -38,6 +41,7 @@ export default function Sidebar() {
               onClick={() => {
                 sounds.playClick();
                 if (item.id === 'nilai' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'nilai'); }
+                if (item.id === 'setting' && activeRole === 'guru') { localStorage.setItem('portal_admin_tab', 'setting'); }
                 setActiveTab(item.id);
                 setIsMobileMenuOpen(false);
               }}
