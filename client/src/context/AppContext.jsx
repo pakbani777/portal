@@ -25,9 +25,10 @@ export function AppProvider({ children }) {
 
   const loadDaftarKelas = async () => {
     try {
-      const data = await fetchKelas();
-      if (Array.isArray(data) && data.length > 0) {
-        setDaftarKelas(data);
+      const res = await fetchKelas();
+      const list = Array.isArray(res) ? res : res?.data;
+      if (Array.isArray(list) && list.length > 0) {
+        setDaftarKelas(list);
       }
     } catch (e) {
       console.warn('Gagal memuat daftar kelas:', e);

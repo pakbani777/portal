@@ -522,13 +522,22 @@ export default function GuruAdminPage({ defaultTab }) {
             >
               Pengumuman
             </button>
+            <button
+              type="button"
+              onClick={() => { sounds.playClick(); setShowModalKelas(true); }}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 ml-1"
+              title="Kelola & Tambah Rombel Kelas"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>+ Kelola Kelas</span>
+            </button>
         </div>
       </div>
 
       {activeAdminTab === 'materi' && (
       <div className="space-y-4">
         {/* Filter Kelas */}
-        <div className="flex items-center justify-end">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1">
             {daftarKelas.map((kls) => (
               <button
@@ -548,6 +557,18 @@ export default function GuruAdminPage({ defaultTab }) {
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setShowModalKelas(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>+ Kelola / Tambah Kelas</span>
+          </button>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-4">

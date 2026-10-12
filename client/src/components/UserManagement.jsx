@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Users, UserPlus, Key, Save, Loader2, ShieldCheck, GraduationCap } from 'lucide-react';
+import { Users, UserPlus, Key, Save, Loader2, ShieldCheck, GraduationCap, School } from 'lucide-react';
+import ModalKelolaKelas from './ModalKelolaKelas';
 import { sounds } from './AudioCues';
 
 import { API_BASE_URL } from '../config';
@@ -8,6 +9,7 @@ import { createBulkUsers, deleteUser, deleteBulkUsers } from '../services/api';
 
 export default function UserManagement() {
   const { showToast, daftarKelas = ['7-A', '7-B', '8-A', '8-B', '9-A', '9-B'] } = useApp();
+  const [showModalKelas, setShowModalKelas] = useState(false);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -224,6 +226,13 @@ export default function UserManagement() {
               <UserPlus className="w-4 h-4" />
               {showAddForm ? 'Batal Tambah' : 'Tambah Satuan'}
             </button>
+            <button
+              onClick={() => { sounds.playClick(); setShowModalKelas(true); }}
+              className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <School className="w-4 h-4" />
+              Kelola / Tambah Kelas
+            </button>
           </div>
 
       </div>
@@ -238,7 +247,16 @@ export default function UserManagement() {
           <form onSubmit={handleBulkSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Target Kelas</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-slate-600">Target Kelas</label>
+                  <button
+                    type="button"
+                    onClick={() => { sounds.playClick(); setShowModalKelas(true); }}
+                    className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                  >
+                    + Kelola / Tambah Kelas
+                  </button>
+                </div>
                 <select
                   required
                   value={bulkForm.kelas}
@@ -344,7 +362,16 @@ export default function UserManagement() {
               {addForm.role === 'siswa' && (
                 <>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Kelas</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-600">Kelas</label>
+                      <button
+                        type="button"
+                        onClick={() => { sounds.playClick(); setShowModalKelas(true); }}
+                        className="text-[10px] text-blue-600 hover:underline font-bold cursor-pointer"
+                      >
+                        + Tambah Kelas
+                      </button>
+                    </div>
                     <select
                       value={addForm.kelas}
                       onChange={(e) => setAddForm({ ...addForm, kelas: e.target.value })}
@@ -495,6 +522,7 @@ export default function UserManagement() {
         </div>
       </div>
 
+      <ModalKelolaKelas isOpen={showModalKelas} onClose={() => setShowModalKelas(false)} />
     </div>
   );
 }

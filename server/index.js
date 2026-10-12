@@ -1138,7 +1138,10 @@ app.post('/api/kelas', async (req, res) => {
     if (!nama_kelas || !nama_kelas.trim()) {
       return res.status(400).json({ success: false, message: 'Nama kelas wajib diisi' });
     }
-    nama_kelas = nama_kelas.trim().toUpperCase();
+    nama_kelas = nama_kelas.trim().toUpperCase().replace(/\s*-\s*/g, '-').replace(/\s+/g, ' ');
+    if (/^[0-9]+[A-Z]$/.test(nama_kelas)) {
+      nama_kelas = `${nama_kelas.slice(0, -1)}-${nama_kelas.slice(-1)}`;
+    }
     const current = await getStoredClasses();
     if (!current.includes(nama_kelas)) {
       current.push(nama_kelas);
