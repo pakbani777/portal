@@ -969,7 +969,7 @@ app.post('/api/pengumuman', async (req, res) => {
 // ==========================================
 app.get('/api/pengumuman', async (req, res) => {
   try {
-    const { data: items, error } = await supabase.from('pengumuman').select('*').order('id', { ascending: false });
+    const { data: items, error } = await supabase.from('pengumuman').select('*').not('judul', 'like', 'SETTING_%').order('id', { ascending: false });
     if (error) throw error;
     res.json({ success: true, data: items });
   } catch (error) {
@@ -1031,6 +1031,76 @@ app.delete('/api/tugas/:id', async (req, res) => {
     const { error } = await supabase.from('tugas').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true, message: 'Tugas berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+// ==========================================
+// 12. PENGATURAN SISTEM & LINK BANTUAN LOGIN
+// ==========================================
+app.get('/api/settings', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('pengumuman')
+      .select('*')
+      .eq('judul', 'SETTING_LINK_BANTUAN_LOGIN')
+      .limit(1);
+    
+    let link = '';
+    if (data && data.length > 0) {
+      link = data[0].isi || '';
+    } else {
+      const settingsPath = path.join(__dirname, 'settings.json');
+      if (fs.existsSync(settingsPath)) {
+        try {
+          const fileData = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+          link = fileData.link_bantuan_login || '';
+        } catch {}
+      }
+    }
+    res.json({ success: true, data: { link_bantuan_login: link } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.post('/api/settings', async (req, res) => {
+  try {
+    const { link_bantuan_login } = req.body;
+    const url = (link_bantuan_login || '').trim();
+
+    // 1. Simpan ke Supabase
+    const { data: existing } = await supabase
+      .from('pengumuman')
+      .select('*')
+      .eq('judul', 'SETTING_LINK_BANTUAN_LOGIN')
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      await supabase
+        .from('pengumuman')
+        .update({ isi: url, tanggal: new Date().toISOString() })
+        .eq('judul', 'SETTING_LINK_BANTUAN_LOGIN');
+    } else {
+      await supabase
+        .from('pengumuman')
+        .insert([{
+          judul: 'SETTING_LINK_BANTUAN_LOGIN',
+          isi: url,
+          tanggal: new Date().toISOString(),
+          penulis: 'admin'
+        }]);
+    }
+
+    // 2. Simpan ke file lokal sebagai fallback
+    const settingsPath = path.join(__dirname, 'settings.json');
+    try {
+      fs.writeFileSync(settingsPath, JSON.stringify({ link_bantuan_login: url }, null, 2));
+    } catch {}
+
+    res.json({ success: true, message: 'Pengaturan berhasil disimpan!', data: { link_bantuan_login: url } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

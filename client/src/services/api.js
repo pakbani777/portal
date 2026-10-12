@@ -212,3 +212,17 @@ export const deleteBulkUsers = async (ids) => {
   });
   return res.json();
 };
+
+export const fetchSettings = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/settings`);
+  return res.json();
+};
+
+export const saveSettings = async (data) => {
+  const res = await fetch(`${API_BASE_URL}/api/settings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};

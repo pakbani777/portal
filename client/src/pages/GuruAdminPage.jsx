@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai, createMateri, createPengumuman, createTugas, createUlangan, fetchUlanganList, fetchTugas, deleteTugas } from '../services/api';
+import { fetchNilai, createMateri, createPengumuman, createTugas, createUlangan, fetchUlanganList, fetchTugas, deleteTugas, fetchSettings, saveSettings } from '../services/api';
 import { Settings, PlusCircle, Download, Send, ShieldCheck, Trash2, ExternalLink, Link as LinkIcon } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
@@ -29,6 +29,38 @@ export default function GuruAdminPage() {
 
   const [tugasList, setTugasList] = useState([]);
   const [loadingTugas, setLoadingTugas] = useState(false);
+  const [settingLink, setSettingLink] = useState('');
+  const [savingSetting, setSavingSetting] = useState(false);
+
+  const loadSettings = () => {
+    fetchSettings()
+      .then((res) => {
+        if (res.success && res.data) {
+          setSettingLink(res.data.link_bantuan_login || '');
+        }
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    sounds.playClick();
+    setSavingSetting(true);
+    try {
+      const res = await saveSettings({ link_bantuan_login: settingLink.trim() });
+      if (res.success) {
+        sounds.playSuccess();
+        showToast('Link bantuan login murid berhasil disimpan!');
+      } else {
+        sounds.playError();
+        showToast(res.message || 'Gagal menyimpan pengaturan', 'error');
+      }
+    } catch (err) {
+      sounds.playError();
+      showToast('Gagal menyimpan pengaturan', 'error');
+    }
+    setSavingSetting(false);
+  };
 
   const loadTugasList = () => {
     setLoadingTugas(true);
@@ -59,6 +91,7 @@ export default function GuruAdminPage() {
   useEffect(() => {
     loadNilai();
     loadTugasList();
+    loadSettings();
   }, [activeKelas]);
 
   const handleCreateMateriSubmit = async (e) => {
@@ -1051,6 +1084,75 @@ Bobot: 2
                   Belum ada tugas yang diterbitkan untuk Kelas {activeKelas}.
                 </div>
               )}
+            </div>
+          </div>
+        )}
+        {activeAdminTab === 'setting' && (
+          <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+              <div className="border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  ⚙️ Pengaturan Halaman Login & Bantuan Akun Murid
+                </h2>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Atur tautan halaman eksternal (Google Drive / Spreadsheet / Docs) yang berisi daftar username & kata sandi para murid. Tautan ini akan muncul di halaman login murid saat mereka mengeklik <strong>"Lupa Username atau Kata Sandi?"</strong>.
+                </p>
+              </div>
+
+              <form onSubmit={handleSaveSettings} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
+                    Link Halaman Eksternal (User & Password Murid)
+                  </label>
+                  <input
+                    type="url"
+                    value={settingLink}
+                    onChange={(e) => setSettingLink(e.target.value)}
+                    placeholder="Contoh: https://docs.google.com/spreadsheets/d/... atau https://drive.google.com/..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                    💡 <strong>Tips:</strong> Pastikan tautan Google Drive atau Google Spreadsheet sudah diatur dengan hak akses <em>"Siapa saja yang memiliki link dapat melihat (Viewer)"</em> agar murid dapat membukanya.
+                  </p>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  {settingLink ? (
+                    <a
+                      href={settingLink.startsWith('http') ? settingLink : `https://${settingLink}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 underline"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Uji Buka Tautan Saat Ini
+                    </a>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">Belum ada link yang disimpan.</span>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={savingSetting}
+                    className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-600/20 transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    {savingSetting ? 'Menyimpan...' : 'Simpan Pengaturan'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Petunjuk Penggunaan */}
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 space-y-1.5">
+              <h4 className="font-bold flex items-center gap-1.5 text-amber-950">
+                📌 Catatan Pengaturan:
+              </h4>
+              <p className="leading-relaxed">
+                Di halaman login, menu "Akses Cepat Pengujian" telah dinonaktifkan. Sebagai gantinya, siswa yang lupa username atau password dapat mengeklik tombol bantuan yang akan langsung membuka tautan daftar akun yang Bapak tentukan di atas.
+              </p>
             </div>
           </div>
         )}

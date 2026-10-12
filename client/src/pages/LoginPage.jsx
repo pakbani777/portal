@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { loginUser } from '../services/api';
-import { BookOpen, GraduationCap, ShieldCheck, Lock, User, ArrowRight, Sparkles, KeyRound } from 'lucide-react';
+import { loginUser, fetchSettings } from '../services/api';
+import { BookOpen, GraduationCap, ShieldCheck, Lock, User, ArrowRight, KeyRound, ExternalLink, HelpCircle } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 
 export default function LoginPage() {
@@ -12,6 +12,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [linkBantuan, setLinkBantuan] = useState('');
+
+  useEffect(() => {
+    fetchSettings()
+      .then((res) => {
+        if (res.success && res.data?.link_bantuan_login) {
+          setLinkBantuan(res.data.link_bantuan_login);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -188,50 +199,28 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Akses Cepat Demo (Satu Klik Masuk) */}
-        <div className="mt-6 pt-5 border-t border-slate-100">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5 flex items-center justify-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            Akses Cepat Pengujian (1-Klik Masuk)
+        {/* Opsi Bantuan Lupa Username / Password */}
+        <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-2.5">
+          <p className="text-xs font-semibold text-slate-500">
+            Lupa Username atau Kata Sandi?
           </p>
-
-          <div className="grid grid-cols-2 gap-2 text-left">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('pakbani', 'pakbani123', 'guru')}
-              className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 transition-all cursor-pointer"
+          {linkBantuan ? (
+            <a
+              href={linkBantuan.startsWith('http') ? linkBantuan : `https://${linkBantuan}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sounds.playClick()}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold text-xs transition-all shadow-xs group cursor-pointer"
             >
-              <span className="text-[10px] font-bold uppercase block text-amber-700">Admin</span>
-              <span className="text-xs font-extrabold block">Ma'ruf Robbani, S.Pd.I., Gr.</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('ahmad', 'siswa123', 'siswa')}
-              className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-950 transition-all cursor-pointer"
-            >
-              <span className="text-[10px] font-bold uppercase block text-blue-700">Murid Kelas 7-A</span>
-              <span className="text-xs font-extrabold block">Ahmad Fauzi</span>
-            </button>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('aditya', 'siswa123', 'siswa')}
-              className="text-[11px] font-semibold text-slate-500 hover:text-blue-700 underline cursor-pointer"
-            >
-              Murid Kelas 8-A (Aditya)
-            </button>
-            <span className="text-slate-300">•</span>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('alif', 'siswa123', 'siswa')}
-              className="text-[11px] font-semibold text-slate-500 hover:text-blue-700 underline cursor-pointer"
-            >
-              Murid Kelas 9-A (Alif)
-            </button>
-          </div>
+              <KeyRound className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
+              <span>Daftar Akun & Password Murid</span>
+              <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
+            </a>
+          ) : (
+            <p className="text-[11px] text-slate-400 italic">
+              Silakan hubungi Guru Pengampu (Ma'ruf Robbani, S.Pd.I., Gr.) jika lupa akun.
+            </p>
+          )}
         </div>
 
       </div>
