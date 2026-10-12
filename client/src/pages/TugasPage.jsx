@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { fetchTugas, submitTugas } from '../services/api';
-import { ClipboardList, Clock, Upload, CheckCircle2, ChevronRight, Download } from 'lucide-react';
+import { ClipboardList, Clock, Upload, CheckCircle2, ChevronRight, Download, ExternalLink } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 
 export default function TugasPage() {
@@ -95,13 +95,13 @@ export default function TugasPage() {
               <div className="mt-auto">
                 
                   <a
-                    href={tugas.link_tugas || '#'}
+                    href={tugas.link_tugas?.startsWith('http') ? tugas.link_tugas : `https://${tugas.link_tugas || ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => sounds.playClick()}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md shadow-blue-600/20"
                   >
-                    <Upload className="w-4 h-4" /> Kumpulkan Tugas
+                    <ExternalLink className="w-4 h-4" /> Kumpulkan ke Google Drive
                   </a>
 
               </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { fetchNilai, createMateri, createPengumuman, createTugas, createUlangan, fetchUlanganList } from '../services/api';
-import { Settings, PlusCircle, Download, Send, ShieldCheck } from 'lucide-react';
+import { fetchNilai, createMateri, createPengumuman, createTugas, createUlangan, fetchUlanganList, fetchTugas, deleteTugas } from '../services/api';
+import { Settings, PlusCircle, Download, Send, ShieldCheck, Trash2, ExternalLink, Link as LinkIcon } from 'lucide-react';
 import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -27,6 +27,19 @@ export default function GuruAdminPage() {
   });
   const [submittingMateri, setSubmittingMateri] = useState(false);
 
+  const [tugasList, setTugasList] = useState([]);
+  const [loadingTugas, setLoadingTugas] = useState(false);
+
+  const loadTugasList = () => {
+    setLoadingTugas(true);
+    fetchTugas(activeKelas)
+      .then((res) => {
+        if (res.success) setTugasList(res.data || []);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoadingTugas(false));
+  };
+
   const loadNilai = () => {
     setLoading(true);
     fetchNilai('', activeKelas)
@@ -45,6 +58,7 @@ export default function GuruAdminPage() {
 
   useEffect(() => {
     loadNilai();
+    loadTugasList();
   }, [activeKelas]);
 
   const handleCreateMateriSubmit = async (e) => {
@@ -151,22 +165,51 @@ export default function GuruAdminPage() {
   const [formTugas, setFormTugas] = useState({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
   const [submittingTugas, setSubmittingTugas] = useState(false);
   
-  const handleTugasSubmit = async (e) => {
+    const handleTugasSubmit = async (e) => {
     e.preventDefault();
-    if (!formTugas.judul || !formTugas.deskripsi || !formTugas.deadline || !formTugas.link_tugas) return showToast('Semua kolom tugas harus diisi termasuk link tugas');
+    sounds.playClick();
+    if (!formTugas.judul.trim() || !formTugas.deskripsi.trim() || !formTugas.deadline || !formTugas.link_tugas.trim()) {
+      return showToast('Semua kolom tugas wajib diisi termasuk link Google Drive / Form pengumpulan', 'error');
+    }
     setSubmittingTugas(true);
     try {
-      const res = await createTugas({ ...formTugas, kelas: activeKelas });
+      const res = await createTugas({ 
+        ...formTugas, 
+        kelas: formTugas.kelas || activeKelas 
+      });
       if (res.success) {
-        showToast('Tugas berhasil dibuat!');
+        sounds.playSuccess();
+        showToast('Tugas PAI berhasil diterbitkan!');
         setFormTugas({ judul: '', deskripsi: '', deadline: '', kelas: activeKelas, link_tugas: '' });
+        loadTugasList();
       } else {
-        showToast(res.message);
+        sounds.playError();
+        showToast(res.message || 'Gagal membuat tugas', 'error');
       }
     } catch (e) {
-      showToast('Gagal membuat tugas');
+      sounds.playError();
+      showToast('Gagal membuat tugas', 'error');
     }
     setSubmittingTugas(false);
+  };
+
+  const handleDeleteTugas = async (id, judul) => {
+    if (!window.confirm(`Yakin ingin menghapus tugas "${judul}"?`)) return;
+    sounds.playClick();
+    try {
+      const res = await deleteTugas(id);
+      if (res.success) {
+        sounds.playSuccess();
+        showToast('Tugas berhasil dihapus');
+        loadTugasList();
+      } else {
+        sounds.playError();
+        showToast(res.message || 'Gagal menghapus tugas', 'error');
+      }
+    } catch (err) {
+      sounds.playError();
+      showToast('Gagal menghapus tugas', 'error');
+    }
   };
 
 
@@ -859,33 +902,156 @@ Bobot: 2
         )}
 
         {activeAdminTab === 'tugas' && (
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm animate-in fade-in">
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2 mb-4">
-              📝 Buat Tugas Baru
-            </h2>
-            <form onSubmit={handleTugasSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Judul Tugas</label>
-                <input type="text" value={formTugas.judul} onChange={e => setFormTugas({...formTugas, judul: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-6 animate-in fade-in">
+            {/* Form Buat Tugas */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2 mb-4">
+                📝 Buat Tugas & Link Pengumpulan Google Drive
+              </h2>
+              <form onSubmit={handleTugasSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Batas Waktu (Deadline)</label>
-                  <input type="datetime-local" value={formTugas.deadline} onChange={e => setFormTugas({...formTugas, deadline: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Judul Tugas</label>
+                  <input 
+                    type="text" 
+                    value={formTugas.judul} 
+                    onChange={e => setFormTugas({...formTugas, judul: e.target.value})} 
+                    placeholder="Contoh: Resume Bab 3 - Meneladani Akhlak Terpuji"
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500" 
+                    required 
+                  />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Batas Waktu (Deadline)</label>
+                    <input 
+                      type="datetime-local" 
+                      value={formTugas.deadline} 
+                      onChange={e => setFormTugas({...formTugas, deadline: e.target.value})} 
+                      className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500" 
+                      required 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Target Kelas</label>
+                    <select 
+                      value={formTugas.kelas || activeKelas} 
+                      onChange={e => setFormTugas({...formTugas, kelas: e.target.value})} 
+                      className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    >
+                      <option value="7">Kelas 7</option>
+                      <option value="8">Kelas 8</option>
+                      <option value="9">Kelas 9</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Target Kelas</label>
-                  <input type="text" value={activeKelas} disabled className="w-full px-4 py-2 rounded-xl bg-slate-200 border border-slate-300 text-sm opacity-70" />
+                  <label className="block text-xs font-semibold text-slate-600 mb-1 flex items-center gap-1.5">
+                    <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
+                    Link Pengumpulan Google Drive / Google Form <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="url" 
+                    value={formTugas.link_tugas} 
+                    onChange={e => setFormTugas({...formTugas, link_tugas: e.target.value})} 
+                    placeholder="Contoh: https://drive.google.com/drive/folders/... atau https://forms.gle/..."
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono text-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500" 
+                    required 
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    💡 Masukkan link Google Drive (folder tempat siswa mengunggah tugas) atau Google Form. Siswa akan langsung diarahkan ke tautan ini saat mengklik tombol pengumpulan.
+                  </p>
                 </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Instruksi Tugas</label>
+                  <textarea 
+                    rows="3" 
+                    value={formTugas.deskripsi} 
+                    onChange={e => setFormTugas({...formTugas, deskripsi: e.target.value})} 
+                    placeholder="Tuliskan petunjuk pengerjaan dan format tugas yang harus diunggah siswa ke Google Drive..."
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500" 
+                    required 
+                  />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button 
+                    type="submit" 
+                    disabled={submittingTugas} 
+                    className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl cursor-pointer hover:bg-blue-700 transition flex items-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    {submittingTugas ? 'Menerbitkan...' : 'Terbitkan Tugas PAI'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Daftar Tugas Yang Ada */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Daftar Tugas yang Diterbitkan (Kelas {activeKelas})
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Kelola tugas aktif dan periksa tautan Google Drive pengumpulan
+                  </p>
+                </div>
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 font-bold text-xs rounded-full border border-blue-100">
+                  {tugasList.length} Tugas
+                </span>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Deskripsi / Instruksi Tugas</label>
-                <textarea rows="4" value={formTugas.deskripsi} onChange={e => setFormTugas({...formTugas, deskripsi: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm" required />
-              </div>
-              <button type="submit" disabled={submittingTugas} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl cursor-pointer">
-                {submittingTugas ? 'Membuat...' : 'Terbitkan Tugas'}
-              </button>
-            </form>
+
+              {loadingTugas ? (
+                <div className="py-8 text-center text-slate-400 text-xs">Memuat daftar tugas...</div>
+              ) : tugasList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {tugasList.map((tugas) => (
+                    <div key={tugas.id} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60 flex flex-col justify-between hover:shadow-xs transition">
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md uppercase">
+                            Kelas {tugas.kelas}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">
+                            Deadline: {tugas.deadline ? new Date(tugas.deadline).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-slate-900 text-sm mb-1">{tugas.judul}</h4>
+                        <p className="text-xs text-slate-600 line-clamp-2 mb-3 leading-relaxed">{tugas.deskripsi}</p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                        <a
+                          href={tugas.link_tugas?.startsWith('http') ? tugas.link_tugas : `https://${tugas.link_tugas}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-bold flex items-center gap-1.5 transition"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Buka Google Drive</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTugas(tugas.id, tugas.judul)}
+                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded-lg transition cursor-pointer"
+                          title="Hapus Tugas"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-slate-400 text-xs italic">
+                  Belum ada tugas yang diterbitkan untuk Kelas {activeKelas}.
+                </div>
+              )}
+            </div>
           </div>
         )}
 

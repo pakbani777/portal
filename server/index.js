@@ -1026,6 +1026,16 @@ app.post('/api/tugas/:id/submit', async (req, res) => {
   }
 });
 
+app.delete('/api/tugas/:id', async (req, res) => {
+  try {
+    const { error } = await supabase.from('tugas').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true, message: 'Tugas berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.get('/api/tugas/:id/submissions', async (req, res) => {
   try {
     const { data: items, error } = await supabase.from('tugas_submissions').select('*').eq('tugas_id', req.params.id).order('submitted_at', { ascending: false });

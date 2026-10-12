@@ -169,6 +169,13 @@ export const createTugas = async (data) => {
   return res.json();
 };
 
+export const deleteTugas = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/api/tugas/${id}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};
+
 export const submitTugas = async (tugasId, data) => {
   const res = await fetch(`${API_BASE_URL}/api/tugas/${tugasId}/submit`, {
     method: 'POST',
