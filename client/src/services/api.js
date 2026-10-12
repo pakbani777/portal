@@ -226,3 +226,24 @@ export const saveSettings = async (data) => {
   });
   return res.json();
 };
+
+export const fetchKelas = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/kelas`);
+  return res.json();
+};
+
+export const createKelas = async (nama_kelas) => {
+  const res = await fetch(`${API_BASE_URL}/api/kelas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nama_kelas }),
+  });
+  return res.json();
+};
+
+export const deleteKelas = async (nama_kelas) => {
+  const res = await fetch(`${API_BASE_URL}/api/kelas/${encodeURIComponent(nama_kelas)}`, {
+    method: 'DELETE',
+  });
+  return res.json();
+};

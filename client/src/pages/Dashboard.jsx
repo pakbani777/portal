@@ -215,7 +215,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-amber-500" />
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-              Pengumuman Pak Bani
+              Pengumuman Guru (Ma'ruf Robbani, S.Pd.I., Gr.)
             </h2>
           </div>
 

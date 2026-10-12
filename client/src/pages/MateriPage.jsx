@@ -5,7 +5,7 @@ import { BookOpen, Search, Filter, CheckCircle2, Bookmark, ArrowLeft, Volume2, S
 import { sounds } from '../components/AudioCues';
 
 export default function MateriPage() {
-  const { currentUser, activeKelas, setActiveKelas, readMateriIds, toggleMateriComplete, showToast, activeMateriDetailId, setActiveMateriDetailId } = useApp();
+  const { currentUser, activeKelas, setActiveKelas, daftarKelas = [], readMateriIds, toggleMateriComplete, showToast, activeMateriDetailId, setActiveMateriDetailId } = useApp();
   const [materiList, setMateriList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -219,8 +219,8 @@ export default function MateriPage() {
         </div>
 
         {/* Tab Pilihan Jenjang Kelas 7, 8, 9 */}
-        {currentUser?.role !== 'siswa' && (<div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
-          {['7', '8', '9'].map((kls) => (
+        {currentUser?.role !== 'siswa' && (<div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto gap-1">
+          {daftarKelas.map((kls) => (
             <button
               key={kls}
               onClick={() => {

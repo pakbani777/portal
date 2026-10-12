@@ -463,7 +463,8 @@ app.get('/api/materi', async (req, res) => {
       .order('urutan', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query = query.eq('kelas', Number(kelas));
+      const jenjangNum = parseInt(String(kelas).charAt(0)) || Number(kelas);
+      query = query.eq('kelas', jenjangNum);
     }
     if (kategori && kategori !== 'all') {
       query = query.eq('kategori', kategori);
@@ -805,7 +806,7 @@ app.get('/api/ulangan', async (req, res) => {
       .order('id', { ascending: true });
 
     if (kelas && kelas !== 'all') {
-      query = query.eq('kelas', String(kelas));
+      query = query.or(`kelas.eq.${kelas},kelas.eq.${String(kelas).charAt(0)}`);
     }
     
     const { data: items, error } = await query;
@@ -1040,6 +1041,120 @@ app.delete('/api/tugas/:id', async (req, res) => {
 // ==========================================
 // 12. PENGATURAN SISTEM & LINK BANTUAN LOGIN
 // ==========================================
+
+// ==========================================
+// 13. KELOLA KELAS / ROMBEL DINAMIS
+// ==========================================
+const DEFAULT_KELAS = ['7-A', '7-B', '8-A', '8-B', '9-A', '9-B'];
+
+async function getStoredClasses() {
+  let list = [];
+  try {
+    const { data } = await supabase.from('pengumuman').select('*').eq('judul', 'SETTING_DAFTAR_KELAS').limit(1);
+    if (data && data.length > 0 && data[0].isi) {
+      list = JSON.parse(data[0].isi);
+    }
+  } catch {}
+
+  if (!list || list.length === 0) {
+    const p = path.join(__dirname, 'kelas.json');
+    if (fs.existsSync(p)) {
+      try { list = JSON.parse(fs.readFileSync(p, 'utf8')); } catch {}
+    }
+  }
+
+  if (!list || list.length === 0) {
+    list = [...DEFAULT_KELAS];
+  }
+
+  // Gabungkan kelas unik dari tabel siswa dan users
+  try {
+    const [{ data: sKelas }, { data: uKelas }] = await Promise.all([
+      supabase.from('siswa').select('kelas'),
+      supabase.from('users').select('kelas').eq('role', 'siswa')
+    ]);
+    (sKelas || []).forEach(s => { if (s.kelas && !list.includes(s.kelas)) list.push(s.kelas); });
+    (uKelas || []).forEach(u => { if (u.kelas && !list.includes(u.kelas)) list.push(u.kelas); });
+  } catch {}
+
+  return Array.from(new Set(list.filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+async function saveStoredClasses(list) {
+  const jsonStr = JSON.stringify(list);
+  try {
+    const { data: existing } = await supabase.from('pengumuman').select('*').eq('judul', 'SETTING_DAFTAR_KELAS').limit(1);
+    if (existing && existing.length > 0) {
+      await supabase.from('pengumuman').update({ isi: jsonStr, tanggal: new Date().toISOString() }).eq('judul', 'SETTING_DAFTAR_KELAS');
+    } else {
+      await supabase.from('pengumuman').insert([{
+        judul: 'SETTING_DAFTAR_KELAS',
+        isi: jsonStr,
+        tanggal: new Date().toISOString(),
+        penulis: 'admin'
+      }]);
+    }
+  } catch {}
+
+  try {
+    fs.writeFileSync(path.join(__dirname, 'kelas.json'), JSON.stringify(list, null, 2));
+  } catch {}
+}
+
+app.get('/api/kelas', async (req, res) => {
+  try {
+    const classes = await getStoredClasses();
+    res.json({ success: true, data: classes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.post('/api/kelas', async (req, res) => {
+  try {
+    let nama_kelas = req.body.nama_kelas || req.body.nama;
+    if (!nama_kelas || !nama_kelas.trim()) {
+      return res.status(400).json({ success: false, message: 'Nama kelas wajib diisi' });
+    }
+    nama_kelas = nama_kelas.trim().toUpperCase();
+    const current = await getStoredClasses();
+    if (!current.includes(nama_kelas)) {
+      current.push(nama_kelas);
+      await saveStoredClasses(current);
+    }
+    const updated = await getStoredClasses();
+    res.json({ success: true, message: `Kelas ${nama_kelas} berhasil ditambahkan!`, data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.delete('/api/kelas/:nama', async (req, res) => {
+  try {
+    const namaKelas = decodeURIComponent(req.params.nama).trim().toUpperCase();
+    
+    // Cek apakah ada siswa di kelas ini
+    const [{ count: cSiswa }, { count: cUsers }] = await Promise.all([
+      supabase.from('siswa').select('*', { count: 'exact', head: true }).eq('kelas', namaKelas),
+      supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'siswa').eq('kelas', namaKelas)
+    ]);
+
+    if ((cSiswa || 0) > 0 || (cUsers || 0) > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Tidak dapat menghapus Kelas ${namaKelas} karena masih terdapat ${(cSiswa || 0) + (cUsers || 0)} siswa terdaftar di kelas ini.` 
+      });
+    }
+
+    let current = await getStoredClasses();
+    current = current.filter(k => k !== namaKelas);
+    await saveStoredClasses(current);
+    res.json({ success: true, message: `Kelas ${namaKelas} berhasil dihapus!`, data: current });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.get('/api/settings', async (req, res) => {
   try {
     const { data } = await supabase

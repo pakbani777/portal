@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchKelas } from '../services/api';
 
 const AppContext = createContext();
 
@@ -19,12 +20,30 @@ export function AppProvider({ children }) {
   // Role: 'siswa' atau 'guru'
   const activeRole = currentUser?.role || 'siswa';
 
-  // Kelas terpilih (7, 8, atau 9)
+  // Daftar kelas dinamis
+  const [daftarKelas, setDaftarKelas] = useState(['7-A', '7-B', '8-A', '8-B', '9-A', '9-B']);
+
+  const loadDaftarKelas = async () => {
+    try {
+      const data = await fetchKelas();
+      if (Array.isArray(data) && data.length > 0) {
+        setDaftarKelas(data);
+      }
+    } catch (e) {
+      console.warn('Gagal memuat daftar kelas:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadDaftarKelas();
+  }, []);
+
+  // Kelas terpilih (contoh '7-A', '8-B', dsb)
   const [activeKelas, setActiveKelas] = useState(() => {
     if (savedUser?.role === 'siswa' && savedUser?.kelas) {
-      return savedUser.kelas.charAt(0);
+      return savedUser.kelas;
     }
-    return localStorage.getItem('pai_kelas') || '7';
+    return localStorage.getItem('pai_kelas') || '7-A';
   });
 
   // Tab aktif: disesuaikan berdasarkan peran
@@ -68,7 +87,7 @@ export function AppProvider({ children }) {
     localStorage.setItem('portal_user', JSON.stringify(userData));
 
     if (userData.role === 'siswa' && userData.kelas) {
-      setActiveKelas(userData.kelas.charAt(0));
+      setActiveKelas(userData.kelas);
       setActiveTab('dashboard');
     } else {
       setActiveTab('admin_dashboard');
@@ -117,6 +136,9 @@ export function AppProvider({ children }) {
         logout,
         activeKelas,
         setActiveKelas,
+        daftarKelas,
+        setDaftarKelas,
+        loadDaftarKelas,
         activeTab,
         setActiveTab: switchTab,
       isMobileMenuOpen,

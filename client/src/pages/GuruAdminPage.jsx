@@ -6,9 +6,11 @@ import { sounds } from '../components/AudioCues';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import UserManagement from '../components/UserManagement';
+import ModalKelolaKelas from '../components/ModalKelolaKelas';
 
 export default function GuruAdminPage({ defaultTab }) {
-  const { activeKelas, setActiveKelas, showToast } = useApp();
+  const { activeKelas, setActiveKelas, daftarKelas = [], showToast } = useApp();
+  const [showModalKelas, setShowModalKelas] = useState(false);
   const [nilaiList, setNilaiList] = useState([]);
   const [ulanganList, setUlanganList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -362,7 +364,7 @@ export default function GuruAdminPage({ defaultTab }) {
     try {
       const res = await createUlangan({
         ...formUlangan,
-        kelas: activeKelas,
+        kelas: formUlangan.kelas || activeKelas,
         soal_json: soalList
       });
       if (res.success) {
@@ -406,7 +408,7 @@ export default function GuruAdminPage({ defaultTab }) {
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Settings className="w-6 h-6 text-amber-600" />
-            Panel Pengelolaan Pak Bani
+            Panel Pengelolaan Ma'ruf Robbani, S.Pd.I., Gr.
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             Buku rekapitulasi nilai ujian siswa dan input bahan ajar materi PAI Kelas {activeKelas}.
@@ -482,8 +484,8 @@ export default function GuruAdminPage({ defaultTab }) {
       <div className="space-y-4">
         {/* Filter Kelas */}
         <div className="flex items-center justify-end">
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
-            {['7', '8', '9'].map((kls) => (
+          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1">
+            {daftarKelas.map((kls) => (
               <button
                 key={kls}
                 onClick={() => {
@@ -523,9 +525,11 @@ export default function GuruAdminPage({ defaultTab }) {
                     onChange={(e) => setFormMateri({ ...formMateri, kelas: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-hidden"
                   >
-                    <option value="7">Kelas 7</option>
-                    <option value="8">Kelas 8</option>
-                    <option value="9">Kelas 9</option>
+                    {daftarKelas.map(k => (
+                      <option key={k} value={k}>Kelas {k}</option>
+                    ))}
+
+
                   </select>
                 </div>
                 <div>
@@ -632,9 +636,9 @@ export default function GuruAdminPage({ defaultTab }) {
 
       {activeAdminTab === 'nilai' && (
       <div className="space-y-4">
-        <div className="flex items-center justify-end">
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
-            {['7', '8', '9'].map((kls) => (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1">
+            {daftarKelas.map((kls) => (
               <button
                 key={kls}
                 onClick={() => {
@@ -651,6 +655,18 @@ export default function GuruAdminPage({ defaultTab }) {
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick();
+              setShowModalKelas(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs transition cursor-pointer"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>+ Kelola / Tambah Kelas</span>
+          </button>
         </div>
 
         <div className="space-y-4">
@@ -786,7 +802,15 @@ export default function GuruAdminPage({ defaultTab }) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Target Kelas</label>
-                  <input type="text" value={activeKelas} disabled className="w-full px-4 py-2 rounded-xl bg-slate-200 border border-slate-300 text-sm opacity-70" />
+                  <select 
+                    value={formUlangan.kelas || activeKelas} 
+                    onChange={e => setFormUlangan({...formUlangan, kelas: e.target.value})} 
+                    className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm cursor-pointer"
+                  >
+                    {daftarKelas.map(k => (
+                      <option key={k} value={k}>Kelas {k}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Durasi (Menit)</label>
@@ -989,9 +1013,11 @@ Bobot: 2
                       onChange={e => setFormTugas({...formTugas, kelas: e.target.value})} 
                       className="w-full px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     >
-                      <option value="7">Kelas 7</option>
-                      <option value="8">Kelas 8</option>
-                      <option value="9">Kelas 9</option>
+                      {daftarKelas.map(k => (
+                        <option key={k} value={k}>Kelas {k}</option>
+                      ))}
+
+
                     </select>
                   </div>
                 </div>
@@ -1174,6 +1200,7 @@ Bobot: 2
           </div>
         )}
 
+      <ModalKelolaKelas isOpen={showModalKelas} onClose={() => setShowModalKelas(false)} />
     </div>
   );
 }

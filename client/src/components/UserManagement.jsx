@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../config';
 import { createBulkUsers, deleteUser, deleteBulkUsers } from '../services/api';
 
 export default function UserManagement() {
-  const { showToast } = useApp();
+  const { showToast, daftarKelas = ['7-A', '7-B', '8-A', '8-B', '9-A', '9-B'] } = useApp();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -239,13 +239,22 @@ export default function UserManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1">Target Kelas</label>
-                <input
-                  type="text" required
+                <select
+                  required
                   value={bulkForm.kelas}
                   onChange={(e) => setBulkForm({ ...bulkForm, kelas: e.target.value })}
-                  placeholder="Contoh: 7-A, 8-B"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm"
-                />
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm cursor-pointer"
+                >
+                  {daftarKelas.map(k => (
+                    <option key={k} value={k}>Kelas {k}</option>
+                  ))}
+                </select>
+
+
+
+
+
+
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-1">Password Massal</label>
@@ -336,13 +345,21 @@ export default function UserManagement() {
                 <>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">Kelas</label>
-                    <input
-                      type="text"
-                      placeholder="Contoh: 7-A"
+                    <select
                       value={addForm.kelas}
                       onChange={(e) => setAddForm({ ...addForm, kelas: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm"
-                    />
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm cursor-pointer"
+                    >
+                      {daftarKelas.map(k => (
+                        <option key={k} value={k}>Kelas {k}</option>
+                      ))}
+                    </select>
+
+
+
+
+
+
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">Jenis Kelamin</label>

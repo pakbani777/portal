@@ -5,7 +5,7 @@ import { UserCheck, CheckCircle2, Calendar, Download, ShieldCheck, Info, Chevron
 import { sounds } from '../components/AudioCues';
 
 export default function AbsensiPage() {
-  const { activeKelas, setActiveKelas, currentUser, activeRole, showToast } = useApp();
+  const { activeKelas, setActiveKelas, daftarKelas = [], currentUser, activeRole, showToast } = useApp();
 
   // State Bulan Terpilih (Format: 'YYYY-MM')
   const [selectedBulan, setSelectedBulan] = useState('2026-09');
@@ -30,7 +30,7 @@ export default function AbsensiPage() {
     { value: '2026-12', label: 'Desember 2026' },
   ];
 
-  const kelasLabel = `${activeKelas}-A`;
+  const kelasLabel = activeKelas.includes('-') ? activeKelas : `${activeKelas}-A`;
 
   // Load data bulanan
   const loadDataBulanan = () => {
@@ -213,7 +213,7 @@ export default function AbsensiPage() {
               Presensi Siswa PAI Per Bulan
             </h1>
             <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-              Dikelola Pak Bani
+              Dikelola Ma'ruf Robbani, S.Pd.I., Gr.
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
@@ -222,8 +222,8 @@ export default function AbsensiPage() {
         </div>
 
         {/* Pemilih Jenjang Kelas 7, 8, 9 */}
-        {currentUser?.role !== 'siswa' && (<div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
-          {['7', '8', '9'].map((kls) => (
+        {currentUser?.role !== 'siswa' && (<div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto gap-1">
+          {daftarKelas.map((kls) => (
             <button
               key={kls}
               onClick={() => {
@@ -236,7 +236,7 @@ export default function AbsensiPage() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Kelas {kls}-A
+              Kelas {kls}
             </button>
           ))}
         </div>)}

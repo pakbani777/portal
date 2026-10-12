@@ -5,7 +5,7 @@ import { FileSpreadsheet, KeyRound, Clock, AlertTriangle, CheckCircle2, Award, P
 import { sounds } from '../components/AudioCues';
 
 export default function UlanganPage() {
-  const { activeKelas, setActiveKelas, currentUser, showToast, activeUlanganId, setActiveUlanganId } = useApp();
+  const { activeKelas, setActiveKelas, daftarKelas = [], currentUser, showToast, activeUlanganId, setActiveUlanganId } = useApp();
 
   const [ulanganList, setUlanganList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -515,8 +515,8 @@ export default function UlanganPage() {
         </div>
 
         {/* Filter Kelas */}
-        {currentUser?.role !== 'siswa' && (<div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
-          {['7', '8', '9'].map((kls) => (
+        {currentUser?.role !== 'siswa' && (<div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 self-start sm:self-auto gap-1">
+          {daftarKelas.map((kls) => (
             <button
               key={kls}
               onClick={() => {
